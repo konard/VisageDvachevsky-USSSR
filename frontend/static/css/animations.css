@@ -1,0 +1,322 @@
+/**
+ * Enhanced Animations for USSR Leaders Platform
+ */
+
+/* Fade in animation on page load */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Apply animations to elements */
+.header {
+    animation: fadeIn 0.8s ease-out;
+}
+
+.site-title {
+    animation: slideInLeft 1s ease-out 0.2s both;
+}
+
+.search-container {
+    animation: slideInRight 1s ease-out 0.4s both;
+}
+
+.leader-card {
+    animation: fadeInUp 0.6s ease-out both;
+    animation-delay: calc(var(--card-index, 0) * 0.1s);
+}
+
+.leader-card:hover {
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* Smooth hover effects */
+.btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Enhanced card animations */
+.leader-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.leader-card:hover {
+    transform: translateY(-15px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.leader-card:hover .leader-card-header {
+    background: linear-gradient(135deg, #d91e40 0%, #9b1726 100%);
+}
+
+/* Animated background for header */
+.header::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 70%
+    );
+    animation: shimmer 3s infinite;
+}
+
+/* Modal animations */
+.modal.active .modal-content {
+    animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal.active {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Loading spinner animation */
+.spinner {
+    animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+}
+
+/* Smooth scroll behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Stagger animation for grid items */
+.leaders-grid .leader-card:nth-child(1) { animation-delay: 0.1s; }
+.leaders-grid .leader-card:nth-child(2) { animation-delay: 0.2s; }
+.leaders-grid .leader-card:nth-child(3) { animation-delay: 0.3s; }
+.leaders-grid .leader-card:nth-child(4) { animation-delay: 0.4s; }
+.leaders-grid .leader-card:nth-child(5) { animation-delay: 0.5s; }
+.leaders-grid .leader-card:nth-child(6) { animation-delay: 0.6s; }
+.leaders-grid .leader-card:nth-child(7) { animation-delay: 0.7s; }
+
+/* Interactive hover effects */
+.search-input:focus {
+    animation: pulse 0.3s ease-in-out;
+}
+
+.search-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-btn:active {
+    transform: scale(0.95);
+}
+
+/* Gradient animation for titles */
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.title-main {
+    background: linear-gradient(
+        90deg,
+        #ffffff,
+        #ffd700,
+        #ffffff,
+        #ffd700
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 5s ease infinite;
+}
+
+/* Particle effect for background */
+@keyframes particleFloat {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0.5;
+    }
+    33% {
+        transform: translate(30px, -30px) rotate(120deg);
+        opacity: 0.8;
+    }
+    66% {
+        transform: translate(-20px, 20px) rotate(240deg);
+        opacity: 0.3;
+    }
+}
+
+/* Enhanced loading state */
+.loading {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.loading .spinner {
+    position: relative;
+}
+
+.loading .spinner::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 215, 0, 0.2);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Smooth page transitions */
+.page-wrapper {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Enhanced focus states for accessibility */
+*:focus-visible {
+    outline: 3px solid var(--color-secondary);
+    outline-offset: 3px;
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* Ripple effect on click */
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+}
+
+.ripple-effect:active::after {
+    animation: ripple 0.6s ease-out;
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
