@@ -3,7 +3,7 @@ AI Service module for generating facts and semantic search
 """
 import os
 import random
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class AIService:
     """AI service for generating facts and semantic search"""
@@ -110,7 +110,7 @@ class AIService:
 
         return results
 
-    def get_ai_response(self, prompt: str, leader: Dict = None) -> str:
+    def get_ai_response(self, prompt: str, leader: Optional[Dict] = None) -> str:
         """
         Get AI-generated response (placeholder for future LLM integration)
 

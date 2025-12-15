@@ -128,7 +128,7 @@ config_by_name = {
 }
 
 
-def get_config(config_name: Optional[str] = None) -> Config:
+def get_config(config_name: Optional[str] = None):
     """Get configuration object based on environment"""
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')

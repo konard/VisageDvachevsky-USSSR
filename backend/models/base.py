@@ -19,7 +19,7 @@ class TimestampMixin:
     )
 
 
-class BaseModel(db.Model):
+class BaseModel(db.Model):  # type: ignore[name-defined]
     """Abstract base model with common methods"""
 
     __abstract__ = True
