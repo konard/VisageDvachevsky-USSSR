@@ -159,6 +159,7 @@ async function showLeaderDetails(leaderId) {
             <div class="modal-header">
                 <h2 class="modal-title">${leader.name_ru}</h2>
                 <p class="modal-subtitle">${leader.name_en}</p>
+                ${leader.short_description ? `<p class="modal-description">${leader.short_description}</p>` : ''}
             </div>
             <div class="modal-body">
                 <div class="info-section">
@@ -178,6 +179,12 @@ async function showLeaderDetails(leaderId) {
                             <div class="info-value">${leader.death_place}</div>
                         </div>
                         ` : ''}
+                        ${leader.years_in_power ? `
+                        <div class="info-item">
+                            <div class="info-label">Годы у власти</div>
+                            <div class="info-value">${leader.years_in_power.start} - ${leader.years_in_power.end}</div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
 
@@ -186,24 +193,40 @@ async function showLeaderDetails(leaderId) {
                     <p>${leader.position}</p>
                 </div>
 
+                ${leader.biography ? `
                 <div class="info-section">
-                    <h3>Достижения</h3>
+                    <h3>Биография</h3>
+                    <p class="biography-text">${leader.biography}</p>
+                </div>
+                ` : ''}
+
+                <div class="info-section">
+                    <h3>Основные достижения</h3>
                     <p>${leader.achievements}</p>
                 </div>
 
+                ${leader.legacy ? `
+                <div class="info-section">
+                    <h3>Историческое наследие</h3>
+                    <p class="legacy-text">${leader.legacy}</p>
+                </div>
+                ` : ''}
+
+                ${facts.length > 0 ? `
                 <div class="info-section">
                     <h3>Интересные факты</h3>
                     <ul class="facts-list">
                         ${facts.map(fact => `<li>${fact}</li>`).join('')}
                     </ul>
                 </div>
+                ` : ''}
 
-                <div class="info-section">
-                    <button class="btn btn-secondary" onclick="playVideo(${leader.video_id}, '${leader.name_ru}')" style="width: 100%; justify-content: center;">
+                <div class="info-section video-section">
+                    <button class="btn btn-primary btn-video" onclick="playVideo(${leader.video_id}, '${leader.name_ru}')" style="width: 100%; justify-content: center;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
                         </svg>
-                        Смотреть видео
+                        Смотреть видео: ${leader.name_ru} о себе
                     </button>
                 </div>
             </div>
