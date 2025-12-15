@@ -56,7 +56,7 @@ def test_login(client, regular_user):
     assert 'access_token' in data['data']
 
 
-def test_login_invalid_credentials(client):
+def test_login_invalid_credentials(client, db):
     """Test login with invalid credentials"""
     response = client.post('/api/auth/login', json={
         'username': 'nonexistent',

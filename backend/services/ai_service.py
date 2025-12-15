@@ -17,7 +17,7 @@ class EnhancedAIService:
         """Initialize AI service with optional configuration"""
         self.config = config
         self.model = None
-        self.use_transformers = config.USE_HUGGINGFACE if config else True
+        self.use_transformers = config.get('USE_HUGGINGFACE', True) if config else True
 
         # Initialize model lazily
         if self.use_transformers:
@@ -101,8 +101,8 @@ class EnhancedAIService:
         """Initialize sentence transformer model"""
         try:
             from sentence_transformers import SentenceTransformer
-            model_name = self.config.AI_MODEL_NAME if self.config else 'sentence-transformers/all-MiniLM-L6-v2'
-            cache_dir = self.config.AI_CACHE_DIR if self.config else './cache/models'
+            model_name = self.config.get('AI_MODEL_NAME', 'sentence-transformers/all-MiniLM-L6-v2') if self.config else 'sentence-transformers/all-MiniLM-L6-v2'
+            cache_dir = self.config.get('AI_CACHE_DIR', './cache/models') if self.config else './cache/models'
 
             # Create cache directory if it doesn't exist
             os.makedirs(cache_dir, exist_ok=True)
