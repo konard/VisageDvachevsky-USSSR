@@ -102,8 +102,18 @@ class AIService:
         results = []
 
         for leader in leaders:
-            # Simple keyword matching (can be enhanced with embeddings later)
-            searchable_text = f"{leader['name_ru']} {leader['name_en']} {leader['position']} {leader['achievements']}".lower()
+            # Keyword matching across all text fields
+            parts = [
+                leader.get('name_ru', ''),
+                leader.get('name_en', ''),
+                leader.get('position', ''),
+                leader.get('achievements', ''),
+                leader.get('biography', '') or '',
+                leader.get('legacy', '') or '',
+                leader.get('short_description', '') or '',
+                leader.get('birth_place', '') or '',
+            ]
+            searchable_text = ' '.join(parts).lower()
 
             if query_lower in searchable_text:
                 results.append(leader)
