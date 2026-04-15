@@ -15,6 +15,19 @@ def test_get_leaders(client, sample_leader):
     assert data['count'] >= 1
 
 
+def test_get_leaders_exposes_archive_media_fields(client, db):
+    """Leaders API should expose portrait and video metadata for archive cards"""
+    response = client.get('/api/leaders/')
+
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['success'] is True
+
+    leader = data['data'][0]
+    assert 'portrait_url' in leader
+    assert 'video_id' in leader
+
+
 def test_get_leader_by_id(client, sample_leader):
     """Test getting a specific leader"""
     response = client.get(f'/api/leaders/{sample_leader.id}')
