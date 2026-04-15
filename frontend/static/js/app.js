@@ -138,6 +138,7 @@ function createLeaderCard(leader, idx) {
         ? `${leader.birth_year} – ${leader.death_year}`
         : `${leader.birth_year} – настоящее время`;
     const portrait = leader.portrait_url || '';
+    const fallbackInitial = escapeHtml(leader.name_ru.charAt(0));
 
     // Calculate years in power for quick fact
     let yearsInPower = '';
@@ -159,8 +160,8 @@ function createLeaderCard(leader, idx) {
         <div class="leader-card-header">
             <div class="leader-portrait-frame">
                 ${portrait
-                    ? `<img class="leader-portrait" src="${escapeAttr(portrait)}" alt="${escapeAttr(leader.name_ru)}">`
-                    : `<div class="leader-portrait leader-portrait-placeholder">${leader.name_ru.charAt(0)}</div>`}
+                    ? `<img class="leader-portrait" src="${escapeAttr(portrait)}" alt="${escapeAttr(leader.name_ru)}" loading="lazy" referrerpolicy="no-referrer" onerror="handlePortraitError(this, '${fallbackInitial}')">`
+                    : `<div class="leader-portrait leader-portrait-placeholder">${fallbackInitial}</div>`}
             </div>
             <div class="significance-dots">${sigDots}</div>
             <span class="era-badge era-${era}">${eraLabel}</span>
@@ -277,7 +278,7 @@ async function showLeaderDetails(leaderId) {
         modalBody.innerHTML = `
             <div class="modal-header">
                 <div class="modal-header-top">
-                    ${leader.portrait_url ? `<img class="modal-portrait" src="${escapeAttr(leader.portrait_url)}" alt="${escapeAttr(leader.name_ru)}">` : ''}
+                    ${leader.portrait_url ? `<img class="modal-portrait" src="${escapeAttr(leader.portrait_url)}" alt="${escapeAttr(leader.name_ru)}" loading="lazy" referrerpolicy="no-referrer" onerror="handlePortraitError(this, '${escapeHtml(leader.name_ru.charAt(0))}')">` : ''}
                     <div style="flex:1">
                         <h2 class="modal-title">${leader.name_ru}</h2>
                         <p class="modal-subtitle">${leader.name_en}</p>
@@ -609,6 +610,24 @@ function escapeAttr(str) {
     return String(str).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
 }
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function handlePortraitError(img, fallbackText) {
+    const fallback = document.createElement('div');
+    fallback.className = img.classList.contains('modal-portrait')
+        ? 'modal-portrait modal-portrait-placeholder'
+        : 'leader-portrait leader-portrait-placeholder';
+    fallback.textContent = fallbackText;
+    img.replaceWith(fallback);
+}
+
 function showLoading(show) {
     loading.style.display = show ? 'block' : 'none';
     leadersGrid.style.display = show ? 'none' : (currentView === 'grid' ? 'grid' : 'none');
@@ -621,3 +640,4 @@ function showLoading(show) {
 window.showLeaderDetails = showLeaderDetails;
 window.playVideo         = playVideo;
 window.resetSearch       = resetSearch;
+window.handlePortraitError = handlePortraitError;

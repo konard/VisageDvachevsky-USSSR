@@ -211,6 +211,24 @@ body {
 
 .hero-copy {
     padding: 24px 26px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-copy::before {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(216,178,74,0.16);
+    pointer-events: none;
+}
+
+.hero-copy-topline {
+    color: var(--color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.28rem;
+    font-size: 0.76rem;
+    margin-bottom: 12px;
 }
 
 .hero-lead {
@@ -242,6 +260,9 @@ body {
     justify-content: end;
     min-height: 160px;
     overflow: hidden;
+    background:
+        linear-gradient(180deg, rgba(216,178,74,0.14), rgba(216,178,74,0) 38%),
+        linear-gradient(135deg, rgba(90,13,17,0.94), rgba(36,17,13,0.98));
 }
 
 .poster-star {
@@ -251,6 +272,25 @@ body {
     font-size: 4rem;
     color: rgba(216,178,74,0.18);
     line-height: 1;
+}
+
+.poster-ray {
+    position: absolute;
+    top: -28%;
+    width: 160px;
+    height: 240px;
+    background: linear-gradient(180deg, rgba(216,178,74,0.22), rgba(216,178,74,0));
+    filter: blur(2px);
+}
+
+.poster-ray-left {
+    left: 18%;
+    transform: rotate(-28deg);
+}
+
+.poster-ray-right {
+    right: 2%;
+    transform: rotate(24deg);
 }
 
 .poster-copy {
@@ -513,6 +553,22 @@ body {
     color: var(--color-secondary);
     font-family: 'Oswald', sans-serif;
     font-size: 2.3rem;
+    text-transform: uppercase;
+    position: relative;
+    background:
+        radial-gradient(circle at 50% 30%, rgba(216,178,74,0.26), transparent 45%),
+        linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+}
+
+.leader-portrait-placeholder::after {
+    content: 'архив';
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.58rem;
+    letter-spacing: 0.18rem;
+    color: rgba(248,241,221,0.72);
 }
 
 .leader-card-header::after {
@@ -978,6 +1034,29 @@ body {
     margin-bottom: 16px;
     position: relative;
     z-index: 1;
+}
+
+.modal-portrait,
+.modal-portrait-placeholder {
+    width: 92px;
+    height: 118px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    object-fit: cover;
+    display: block;
+    background: rgba(31,20,16,0.88);
+    border: 3px solid rgba(216,178,74,0.82);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+}
+
+.modal-portrait-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-secondary);
+    font-family: 'Oswald', sans-serif;
+    font-size: 2rem;
+    text-transform: uppercase;
 }
 
 .modal-era-badge {

@@ -28,6 +28,37 @@ def test_get_leaders_exposes_archive_media_fields(client, db):
     assert 'video_id' in leader
 
 
+def test_get_leaders_preserves_expected_portrait_assignments(client, db):
+    """Specific historical figures should keep their intended portraits."""
+    expected_portrait_fragments = {
+        'Владимир Ильич Ленин': 'Vladimir_Lenin',
+        'Иосиф Виссарионович Сталин': 'Stalin',
+        'Никита Сергеевич Хрущёв': 'Nikita_Khrushchev',
+        'Леонид Ильич Брежнев': 'Leonid_Brezhnev',
+        'Юрий Владимирович Андропов': 'Yuri_Andropov',
+        'Константин Устинович Черненко': 'Konstantin_Chernenko',
+        'Михаил Сергеевич Горбачёв': 'Gorbachev',
+        'Георгий Константинович Жуков': 'Zhukov',
+        'Юрий Алексеевич Гагарин': 'Yuri_Gagarin',
+        'Сергей Павлович Королёв': 'Korolyov',
+        'Валентина Владимировна Терешкова': 'Tereshkova',
+        'Алексей Григорьевич Стаханов': 'Stakhanov',
+    }
+
+    response = client.get('/api/leaders/')
+
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['success'] is True
+
+    portraits_by_name = {leader['name_ru']: leader['portrait_url'] for leader in data['data']}
+
+    for name, fragment in expected_portrait_fragments.items():
+        assert name in portraits_by_name
+        assert portraits_by_name[name]
+        assert fragment in portraits_by_name[name]
+
+
 def test_get_leader_by_id(client, sample_leader):
     """Test getting a specific leader"""
     response = client.get(f'/api/leaders/{sample_leader.id}')
