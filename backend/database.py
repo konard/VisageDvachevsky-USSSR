@@ -68,6 +68,10 @@ class Database:
         conn = self.get_connection()
         cursor = conn.cursor()
 
+        existing = {row[1] for row in cursor.execute("PRAGMA table_info(leaders)")}
+        if 'portrait_url' not in existing:
+            cursor.execute('ALTER TABLE leaders ADD COLUMN portrait_url TEXT')
+
         # Check if data already exists
         cursor.execute('SELECT COUNT(*) FROM leaders')
         if cursor.fetchone()[0] > 0:
@@ -86,9 +90,9 @@ class Database:
                     death_year, death_place, position, achievements,
                     biography, legacy, short_description,
                     years_in_power_start, years_in_power_end,
-                    historical_significance, video_id
+                    historical_significance, video_id, portrait_url
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 leader['id'], leader['name_ru'], leader['name_en'],
                 leader['birth_year'], leader['birth_place'],
@@ -99,7 +103,8 @@ class Database:
                 leader.get('years_in_power_start'),
                 leader.get('years_in_power_end'),
                 leader.get('historical_significance', 5),
-                leader['video_id']
+                leader['video_id'],
+                leader.get('portrait_url')
             ))
 
         conn.commit()
@@ -116,7 +121,8 @@ class Database:
                     short_description = COALESCE(short_description, ?),
                     years_in_power_start = COALESCE(years_in_power_start, ?),
                     years_in_power_end = COALESCE(years_in_power_end, ?),
-                    historical_significance = COALESCE(historical_significance, ?)
+                    historical_significance = COALESCE(historical_significance, ?),
+                    portrait_url = COALESCE(portrait_url, ?)
                 WHERE id = ?
             ''', (
                 leader.get('biography'),
@@ -125,6 +131,7 @@ class Database:
                 leader.get('years_in_power_start'),
                 leader.get('years_in_power_end'),
                 leader.get('historical_significance', 5),
+                leader.get('portrait_url'),
                 leader['id']
             ))
 
@@ -160,7 +167,8 @@ class Database:
                 'years_in_power_start': 1917,
                 'years_in_power_end': 1924,
                 'historical_significance': 10,
-                'video_id': 1
+                'video_id': 1,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/7/79/Vladimir_Lenin.jpg'
             },
             {
                 'id': 2,
@@ -195,7 +203,8 @@ class Database:
                 'years_in_power_start': 1924,
                 'years_in_power_end': 1953,
                 'historical_significance': 10,
-                'video_id': 2
+                'video_id': 2,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/3/38/Stalin_Full_Image.jpg'
             },
             {
                 'id': 3,
@@ -232,7 +241,8 @@ class Database:
                 'years_in_power_start': 1953,
                 'years_in_power_end': 1964,
                 'historical_significance': 8,
-                'video_id': 3
+                'video_id': 3,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Nikita_Khrushchev_1963.jpg'
             },
             {
                 'id': 4,
@@ -268,7 +278,8 @@ class Database:
                 'years_in_power_start': 1964,
                 'years_in_power_end': 1982,
                 'historical_significance': 7,
-                'video_id': 4
+                'video_id': 4,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/6/68/RIAN_archive_850809_Leonid_Brezhnev.jpg'
             },
             {
                 'id': 5,
@@ -303,7 +314,8 @@ class Database:
                 'years_in_power_start': 1982,
                 'years_in_power_end': 1984,
                 'historical_significance': 6,
-                'video_id': 5
+                'video_id': 5,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/2/25/Yuri_Andropov_1974.jpg'
             },
             {
                 'id': 6,
@@ -339,7 +351,8 @@ class Database:
                 'years_in_power_start': 1984,
                 'years_in_power_end': 1985,
                 'historical_significance': 4,
-                'video_id': 6
+                'video_id': 6,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/7/7a/Konstantin_Chernenko_1985.jpg'
             },
             {
                 'id': 7,
@@ -377,7 +390,156 @@ class Database:
                 'years_in_power_start': 1985,
                 'years_in_power_end': 1991,
                 'historical_significance': 9,
-                'video_id': 7
+                'video_id': 7,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/5/59/Gorbachev_1987.jpg'
+            },
+            {
+                'id': 8,
+                'name_ru': 'Георгий Константинович Жуков',
+                'name_en': 'Georgy Konstantinovich Zhukov',
+                'birth_year': 1896,
+                'birth_place': 'Стрелковка (Россия)',
+                'death_year': 1974,
+                'death_place': 'Москва',
+                'position': 'Маршал Советского Союза, заместитель министра обороны СССР',
+                'achievements': (
+                    'Координировал ключевые операции Великой Отечественной войны, включая оборону Москвы, '
+                    'Сталинград, Курскую битву и штурм Берлина. Стал одним из главных символов военной '
+                    'победы СССР.'
+                ),
+                'biography': (
+                    'Георгий Жуков происходил из крестьянской семьи и служил в царской армии, а затем '
+                    'сделал карьеру в Красной армии. Во время Второй мировой войны возглавлял фронты и '
+                    'ставку по наиболее критическим направлениям. После войны занимал высокие посты в '
+                    'министерстве обороны, периодически попадая в политическую опалу.'
+                ),
+                'legacy': (
+                    'Жуков остался в памяти как наиболее известный полководец СССР XX века. Его военная '
+                    'репутация превратилась в часть государственного мифа о победе, а мемуары стали одним '
+                    'из важнейших свидетельств эпохи.'
+                ),
+                'short_description': 'Маршал Победы и главный символ советского военного триумфа',
+                'years_in_power_start': 1941,
+                'years_in_power_end': 1945,
+                'historical_significance': 9,
+                'video_id': 8,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Zhukov_LIFE.jpg'
+            },
+            {
+                'id': 9,
+                'name_ru': 'Юрий Алексеевич Гагарин',
+                'name_en': 'Yuri Alekseyevich Gagarin',
+                'birth_year': 1934,
+                'birth_place': 'Клушино (Россия)',
+                'death_year': 1968,
+                'death_place': 'Киржачский район',
+                'position': 'Лётчик-космонавт СССР, Герой Советского Союза',
+                'achievements': (
+                    '12 апреля 1961 года первым в истории человечества совершил орбитальный полёт в '
+                    'космос на корабле «Восток-1», став глобальным символом научного прорыва СССР.'
+                ),
+                'biography': (
+                    'Юрий Гагарин родился в Смоленской области, окончил ремесленное училище и Оренбургское '
+                    'лётное училище. После отбора в первый отряд космонавтов прошёл интенсивную подготовку '
+                    'и был выбран для первого пилотируемого старта.'
+                ),
+                'legacy': (
+                    'Гагарин стал лицом советской космической мечты и одной из самых узнаваемых фигур '
+                    'Холодной войны. Его образ использовался как доказательство технологического лидерства СССР.'
+                ),
+                'short_description': 'Первый космонавт планеты и главное лицо советского космического рывка',
+                'years_in_power_start': 1961,
+                'years_in_power_end': 1961,
+                'historical_significance': 10,
+                'video_id': 9,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Yuri_Gagarin_%281961%29.jpg'
+            },
+            {
+                'id': 10,
+                'name_ru': 'Сергей Павлович Королёв',
+                'name_en': 'Sergei Pavlovich Korolev',
+                'birth_year': 1907,
+                'birth_place': 'Житомир',
+                'death_year': 1966,
+                'death_place': 'Москва',
+                'position': 'Главный конструктор советской космической программы',
+                'achievements': (
+                    'Руководил созданием ракеты Р-7, запуском первого спутника и программой первых '
+                    'пилотируемых космических полётов, обеспечив СССР лидерство в ранней космической гонке.'
+                ),
+                'biography': (
+                    'Сергей Королёв получил инженерное образование, пережил арест и лагеря в конце 1930-х, '
+                    'после чего был возвращён к работе в оборонной промышленности. После войны возглавил '
+                    'ключевые ракетно-космические проекты страны.'
+                ),
+                'legacy': (
+                    'Королёв стал архитектором советской космической программы. Его имя долгое время '
+                    'оставалось засекреченным, но именно он сформировал технологическую базу советских '
+                    'космических побед.'
+                ),
+                'short_description': 'Главный конструктор, превративший СССР в космическую сверхдержаву',
+                'years_in_power_start': 1957,
+                'years_in_power_end': 1966,
+                'historical_significance': 9,
+                'video_id': 10,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Sergey_Korolyov.jpg'
+            },
+            {
+                'id': 11,
+                'name_ru': 'Валентина Владимировна Терешкова',
+                'name_en': 'Valentina Vladimirovna Tereshkova',
+                'birth_year': 1937,
+                'birth_place': 'Большое Масленниково (Россия)',
+                'death_year': None,
+                'death_place': None,
+                'position': 'Лётчик-космонавт СССР, первая женщина-космонавт',
+                'achievements': (
+                    'В 1963 году совершила полёт на корабле «Восток-6» и стала первой женщиной в космосе, '
+                    'укрепив образ СССР как лидера в освоении космоса и социального прогресса.'
+                ),
+                'biography': (
+                    'Валентина Терешкова работала на текстильной фабрике и занималась парашютным спортом, '
+                    'что привело её в отряд космонавтов. После исторического полёта стала мировой знаменитостью '
+                    'и участвовала в общественно-политической жизни страны.'
+                ),
+                'legacy': (
+                    'Терешкова стала важнейшей фигурой советской визуальной и политической пропаганды 1960-х. '
+                    'Её полёт символизировал открытие космоса не только для мужчин, но и для женщин.'
+                ),
+                'short_description': 'Первая женщина в космосе и символ советского технологического оптимизма',
+                'years_in_power_start': 1963,
+                'years_in_power_end': 1963,
+                'historical_significance': 8,
+                'video_id': 11,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/0/00/RIAN_archive_612748_Valentina_Tereshkova.jpg'
+            },
+            {
+                'id': 12,
+                'name_ru': 'Алексей Григорьевич Стаханов',
+                'name_en': 'Alexey Grigoryevich Stakhanov',
+                'birth_year': 1906,
+                'birth_place': 'Орловская губерния',
+                'death_year': 1977,
+                'death_place': 'Торез',
+                'position': 'Шахтёр, символ стахановского движения',
+                'achievements': (
+                    'Рекордной добычей угля в 1935 году дал имя массовому движению за перевыполнение норм, '
+                    'которое стало одним из ключевых трудовых мифов сталинской индустриализации.'
+                ),
+                'biography': (
+                    'Алексей Стаханов работал на шахтах Донбасса. После публикации его рекорда советская '
+                    'пресса превратила шахтёра в модель нового социалистического героя труда.'
+                ),
+                'legacy': (
+                    'Имя Стаханова стало нарицательным для ударного труда и дисциплины. Его образ десятилетиями '
+                    'использовался на плакатах, в кинохронике и производственной агитации.'
+                ),
+                'short_description': 'Лицо трудового героизма и главный персонаж индустриальной пропаганды 1930-х',
+                'years_in_power_start': 1935,
+                'years_in_power_end': 1935,
+                'historical_significance': 7,
+                'video_id': 12,
+                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Alexey_Stakhanov.jpg'
             }
         ]
 

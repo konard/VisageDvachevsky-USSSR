@@ -7,6 +7,7 @@
 let allLeaders = [];
 let currentView = 'grid';   // 'grid' | 'timeline'
 let currentFilter = 'all';  // 'all' | 'early' | 'mid' | 'late'
+const VIDEO_PLACEHOLDER_TEXT = 'Архивный ролик готовится';
 
 // ===== DOM REFS =====
 const leadersGrid      = document.getElementById('leadersGrid');
@@ -43,7 +44,8 @@ async function loadLeaders() {
 
         if (!response.ok) throw new Error('Failed to fetch leaders');
 
-        allLeaders = await response.json();
+        const payload = await response.json();
+        allLeaders = normalizeLeadersResponse(payload);
 
         // Update count in header
         if (leaderCountEl) leaderCountEl.textContent = allLeaders.length;
@@ -135,6 +137,7 @@ function createLeaderCard(leader, idx) {
     const yearsText = leader.death_year
         ? `${leader.birth_year} – ${leader.death_year}`
         : `${leader.birth_year} – настоящее время`;
+    const portrait = leader.portrait_url || '';
 
     // Calculate years in power for quick fact
     let yearsInPower = '';
@@ -154,6 +157,11 @@ function createLeaderCard(leader, idx) {
 
     card.innerHTML = `
         <div class="leader-card-header">
+            <div class="leader-portrait-frame">
+                ${portrait
+                    ? `<img class="leader-portrait" src="${escapeAttr(portrait)}" alt="${escapeAttr(leader.name_ru)}">`
+                    : `<div class="leader-portrait leader-portrait-placeholder">${leader.name_ru.charAt(0)}</div>`}
+            </div>
             <div class="significance-dots">${sigDots}</div>
             <span class="era-badge era-${era}">${eraLabel}</span>
             <h2 class="leader-name">${leader.name_ru}</h2>
@@ -169,6 +177,7 @@ function createLeaderCard(leader, idx) {
         </div>
         <div class="leader-card-body">
             <p class="leader-position">${leader.position}</p>
+            ${leader.short_description ? `<p class="leader-summary">${leader.short_description}</p>` : ''}
             <p class="leader-achievements">${truncateText(leader.achievements, 140)}</p>
         </div>
         <div class="leader-quick-facts">
@@ -201,8 +210,12 @@ function createLeaderCard(leader, idx) {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
-                Видео
+                Хроника
             </button>
+        </div>
+        <div class="leader-video-strip">
+            <span class="video-strip-label">Видеоархив</span>
+            <span class="video-strip-value">${VIDEO_PLACEHOLDER_TEXT}</span>
         </div>
     `;
 
@@ -246,7 +259,7 @@ async function showLeaderDetails(leaderId) {
         try {
             const factsResponse = await fetch(`/api/leaders/${leaderId}/facts`);
             const factsData = await factsResponse.json();
-            facts = factsData.facts || [];
+            facts = normalizeFactsResponse(factsData);
         } catch (_) {
             // Facts are optional — don't block modal
         }
@@ -264,6 +277,7 @@ async function showLeaderDetails(leaderId) {
         modalBody.innerHTML = `
             <div class="modal-header">
                 <div class="modal-header-top">
+                    ${leader.portrait_url ? `<img class="modal-portrait" src="${escapeAttr(leader.portrait_url)}" alt="${escapeAttr(leader.name_ru)}">` : ''}
                     <div style="flex:1">
                         <h2 class="modal-title">${leader.name_ru}</h2>
                         <p class="modal-subtitle">${leader.name_en}</p>
@@ -371,7 +385,7 @@ async function showLeaderDetails(leaderId) {
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
-                            Смотреть видео: ${leader.name_ru}
+                            Смотреть плейсхолдер: ${leader.name_ru}
                         </button>
                     </div>
                 </div>
@@ -417,7 +431,7 @@ function playVideo(videoId, leaderName) {
     videoModal.classList.add('active');
 
     leaderVideo.play().catch(() => {
-        showToast(`Видео для «${leaderName}» пока недоступно`, 'warn');
+        showToast(`Видеоархив для «${leaderName}» пока не загружен`, 'warn');
         videoModal.classList.remove('active');
     });
 }
@@ -433,14 +447,19 @@ async function handleSearch() {
 
     try {
         showLoading(true);
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        let response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+
+        if (!response.ok && response.status === 404) {
+            response = await fetch(`/api/leaders/search?q=${encodeURIComponent(query)}`);
+        }
 
         if (!response.ok) throw new Error('Search failed');
 
         const data = await response.json();
-        renderLeaders(data.results);
+        const results = normalizeSearchResponse(data);
+        renderLeaders(results);
 
-        if (data.results.length === 0) {
+        if (results.length === 0) {
             noResults.style.display = 'block';
         }
     } catch (error) {
@@ -529,6 +548,42 @@ function closeVideo() {
 /** Returns the currently relevant leaders array (filtered by search if active) */
 function currentSearchResults() {
     return allLeaders; // for now just use all; search applies via handleSearch
+}
+
+function normalizeLeadersResponse(payload) {
+    if (Array.isArray(payload)) {
+        return payload;
+    }
+
+    if (Array.isArray(payload?.data)) {
+        return payload.data;
+    }
+
+    return [];
+}
+
+function normalizeFactsResponse(payload) {
+    if (Array.isArray(payload?.facts)) {
+        return payload.facts;
+    }
+
+    if (Array.isArray(payload?.data?.facts)) {
+        return payload.data.facts;
+    }
+
+    return [];
+}
+
+function normalizeSearchResponse(payload) {
+    if (Array.isArray(payload?.results)) {
+        return payload.results;
+    }
+
+    if (Array.isArray(payload?.data)) {
+        return payload.data;
+    }
+
+    return [];
 }
 
 // ===== TOAST NOTIFICATIONS =====
