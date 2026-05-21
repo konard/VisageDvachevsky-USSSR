@@ -1,24 +1,36 @@
 """
-Pytest configuration and fixtures
-"""
-import pytest
-import sys
-import os
+Pytest configuration and fixtures.
 
-# Add parent directory to path
+Heavy fixtures that rely on the enhanced application stack (Flask, SQLAlchemy,
+JWT, etc.) are registered conditionally so that lightweight unit tests can run
+in environments where only ``requests``/``pytest`` are installed.
+"""
+import os
+import sys
+
+import pytest
+
+# Make ``backend`` importable as a top-level package.
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from app_enhanced import create_app
-from models.base import db as _db
-from models import Leader, User, Role
-from services.auth_service import AuthService
+try:
+    from app_enhanced import create_app
+    from models.base import db as _db
+    from models import Leader, User, Role
+    from services.auth_service import AuthService
+except Exception:  # pragma: no cover - optional stack
+    create_app = None
+    _db = None
+    Leader = User = Role = None
+    AuthService = None
 
 
 @pytest.fixture(scope='session')
 def app():
     """Create application for testing"""
-    app = create_app('testing')
-    return app
+    if create_app is None:
+        pytest.skip("enhanced application stack is unavailable")
+    return create_app('testing')
 
 
 @pytest.fixture(scope='function')
@@ -41,26 +53,24 @@ def db(app):
 @pytest.fixture
 def admin_user(db):
     """Create admin user for testing"""
-    user = AuthService.create_admin_user(
+    return AuthService.create_admin_user(
         username='testadmin',
         email='admin@test.com',
         password='testpass123',
         full_name='Test Admin'
     )
-    return user
 
 
 @pytest.fixture
 def regular_user(db):
     """Create regular user for testing"""
-    user = User.create_user(
+    return User.create_user(
         username='testuser',
         email='user@test.com',
         password='testpass123',
         role_name='user',
         full_name='Test User'
     )
-    return user
 
 
 @pytest.fixture
