@@ -163,6 +163,22 @@ def get_quiz_question():
     })
 
 
+@app.route('/api/videos/available')
+def get_available_videos():
+    """Return list of video IDs that have a corresponding mp4 file in the videos/ directory."""
+    videos_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'videos')
+    available = []
+    if os.path.isdir(videos_dir):
+        for entry in os.listdir(videos_dir):
+            if entry.lower().endswith('.mp4'):
+                stem = entry[:-4]
+                try:
+                    available.append(int(stem))
+                except ValueError:
+                    pass
+    return jsonify({'available': sorted(available)})
+
+
 @app.route('/videos/<path:filename>')
 def serve_video(filename):
     """Serve video files"""

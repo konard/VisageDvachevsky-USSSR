@@ -73,3 +73,14 @@ def test_chat_health_endpoint(client):
         resp = client.get("/api/chat/health")
     assert resp.status_code == 200
     assert resp.get_json()["available"] is True
+
+
+def test_available_videos_endpoint_returns_list(client):
+    """GET /api/videos/available should return a JSON object with 'available' list."""
+    resp = client.get("/api/videos/available")
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert "available" in data
+    assert isinstance(data["available"], list)
+    for vid_id in data["available"]:
+        assert isinstance(vid_id, int)
