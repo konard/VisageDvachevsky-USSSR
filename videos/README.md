@@ -1,6 +1,6 @@
 # Videos Directory
 
-This directory contains historical video files for USSR leaders.
+This directory contains historical video files for USSR leaders and prominent figures.
 
 ## Video Mapping
 
@@ -11,8 +11,18 @@ This directory contains historical video files for USSR leaders.
 - `5.mp4` - Юрий Владимирович Андропов (Yuri Andropov)
 - `6.mp4` - Константин Устинович Черненко (Konstantin Chernenko)
 - `7.mp4` - Михаил Сергеевич Горбачёв (Mikhail Gorbachev)
+- `8.mp4` - Георгий Константинович Жуков (Georgy Zhukov)
+- `9.mp4` - Юрий Алексеевич Гагарин (Yuri Gagarin)
+- `10.mp4` - Сергей Павлович Королёв (Sergei Korolev)
+
+## How it works
+
+Place the corresponding video files (`1.mp4` through `10.mp4`) in this directory.
+The application automatically detects which files are present and shows their availability status in each leader's card.
+
+When a video file is available, the card shows **"Доступен"** and the video button is fully active.
+When a video file is missing, the button still works but shows a message with the expected filename.
 
 ## Note
 
-Place the corresponding video files (1.mp4 through 7.mp4) in this directory.
-The videos should feature each historical figure presenting information about themselves.
+The videos should feature each historical figure or archival footage related to their activities.

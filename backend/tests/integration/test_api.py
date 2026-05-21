@@ -129,6 +129,19 @@ def test_health_check(client):
     assert data['status'] == 'healthy'
 
 
+def test_available_videos_endpoint(client):
+    """Endpoint should return a list of available video IDs (may be empty in test env)."""
+    response = client.get('/api/videos/available')
+
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'available' in data
+    assert isinstance(data['available'], list)
+    # All entries must be integers
+    for vid_id in data['available']:
+        assert isinstance(vid_id, int)
+
+
 def test_login(client, regular_user):
     """Test user login"""
     response = client.post('/api/auth/login', json={

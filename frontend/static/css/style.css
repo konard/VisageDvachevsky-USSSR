@@ -1374,6 +1374,20 @@ body::after {
     color: var(--c-ink);
     flex: 1;
 }
+.btn-video-unavailable {
+    opacity: 0.55;
+    filter: grayscale(40%);
+    cursor: default;
+}
+.btn-video-unavailable:hover {
+    transform: none;
+    box-shadow: 3px 3px 0 var(--c-red-ink);
+    filter: grayscale(40%);
+}
+.video-strip-available {
+    color: #7eca8a;
+    font-weight: 700;
+}
 .btn-chat {
     background: linear-gradient(180deg, #d8c87a 0%, var(--c-bronze) 100%);
     color: var(--c-ink);

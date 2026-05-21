@@ -9,6 +9,7 @@ let currentView = 'grid';   // 'grid' | 'timeline' | 'events' | 'graph'
 let currentFilter = 'all';  // 'all' | 'early' | 'mid' | 'late'
 let currentCategory = 'all'; // 'all' | 'politics' | 'military' | 'space' | 'science' | 'culture' | 'sports' | 'labor'
 const VIDEO_PLACEHOLDER_TEXT = 'Архивный ролик готовится';
+let availableVideoIds = new Set(); // set of video_id numbers for which mp4 files exist
 
 const CATEGORY_META = {
     politics: { label: 'Политика',  icon: '☭' },
@@ -71,9 +72,22 @@ let chatRequestInflight = false;
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
+    loadAvailableVideos();
     loadLeaders();
     setupEventListeners();
 });
+
+async function loadAvailableVideos() {
+    try {
+        const response = await fetch('/api/videos/available');
+        if (response.ok) {
+            const data = await response.json();
+            availableVideoIds = new Set(data.available || []);
+        }
+    } catch (_) {
+        // non-critical: if unavailable, all video buttons stay as-is
+    }
+}
 
 // ===== LEADERS DATA LOADING =====
 async function loadLeaders() {
@@ -273,7 +287,7 @@ function createLeaderCard(leader, idx) {
                 </svg>
                 Подробнее
             </button>
-            <button class="btn btn-secondary" onclick="playVideo(${leader.video_id}, '${escapeAttr(leader.name_ru)}')">
+            <button class="btn btn-secondary${availableVideoIds.size > 0 && !availableVideoIds.has(leader.video_id) ? ' btn-video-unavailable' : ''}" onclick="playVideo(${leader.video_id}, '${escapeAttr(leader.name_ru)}')" title="${availableVideoIds.size > 0 && !availableVideoIds.has(leader.video_id) ? 'Видеофайл не загружен' : 'Смотреть видеохронику'}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
@@ -288,7 +302,7 @@ function createLeaderCard(leader, idx) {
         </div>
         <div class="leader-video-strip">
             <span class="video-strip-label">Видеоархив</span>
-            <span class="video-strip-value">${VIDEO_PLACEHOLDER_TEXT}</span>
+            <span class="video-strip-value${availableVideoIds.size > 0 && availableVideoIds.has(leader.video_id) ? ' video-strip-available' : ''}">${availableVideoIds.size > 0 && availableVideoIds.has(leader.video_id) ? 'Доступен' : VIDEO_PLACEHOLDER_TEXT}</span>
         </div>
     `;
 
@@ -453,13 +467,22 @@ async function showLeaderDetails(leaderId) {
                 <!-- Video Section -->
                 <div class="info-section">
                     <div class="video-section">
-                        <p style="margin-bottom:16px;color:#555;font-size:0.95rem;">Смотрите архивные записи о деятельности этого лидера</p>
+                        ${availableVideoIds.size > 0 && availableVideoIds.has(leader.video_id)
+                            ? `<p style="margin-bottom:16px;color:#555;font-size:0.95rem;">Смотрите архивные записи о деятельности этого деятеля</p>
                         <button class="btn btn-primary btn-video" onclick="playVideo(${leader.video_id}, '${escapeAttr(leader.name_ru)}')">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
-                            Смотреть плейсхолдер: ${leader.name_ru}
-                        </button>
+                            Смотреть хронику: ${leader.name_ru}
+                        </button>`
+                            : `<p style="margin-bottom:16px;color:#888;font-size:0.95rem;">Видеохроника для этого деятеля пока не загружена. Поместите файл <strong>${leader.video_id}.mp4</strong> в папку <code>videos/</code>.</p>
+                        <button class="btn btn-primary btn-video btn-video-unavailable" onclick="playVideo(${leader.video_id}, '${escapeAttr(leader.name_ru)}')" title="Видеофайл не загружен">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            Хроника недоступна
+                        </button>`
+                        }
                     </div>
                 </div>
 
@@ -514,14 +537,18 @@ function playVideo(videoId, leaderName) {
 
     if (videoTitle) videoTitle.textContent = leaderName;
 
-    // Close leader modal if open
     leaderModal.classList.remove('active');
-
-    // Open video modal
     videoModal.classList.add('active');
 
+    // Remove previous error listener to avoid duplicates
+    leaderVideo.onerror = null;
+    leaderVideo.onerror = () => {
+        showToast(`Видеоархив для «${leaderName}» пока не загружен. Поместите файл ${videoId}.mp4 в папку videos/`, 'warn');
+        videoModal.classList.remove('active');
+    };
+
     leaderVideo.play().catch(() => {
-        showToast(`Видеоархив для «${leaderName}» пока не загружен`, 'warn');
+        showToast(`Видеоархив для «${leaderName}» пока не загружен. Поместите файл ${videoId}.mp4 в папку videos/`, 'warn');
         videoModal.classList.remove('active');
     });
 }
