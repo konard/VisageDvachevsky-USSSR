@@ -1,0 +1,1519 @@
+/* ============================================================
+ * USSR Atmosphere — глубокая проработка визуала в стиле СССР
+ * Конструктивизм, парадная палитра, плакатные акценты, агитплакат.
+ * Подключается ПОСЛЕ style.css и animations.css.
+ * ============================================================ */
+
+:root {
+    /* Палитра парада: знамённый красный, золото, кость, чернила, тёплая бумага */
+    --ussr-red: #c0162a;
+    --ussr-red-dark: #7a0c18;
+    --ussr-red-deep: #4a060c;
+    --ussr-gold: #f3c500;
+    --ussr-gold-deep: #b88a00;
+    --ussr-ivory: #f4ecd0;
+    --ussr-paper: #ead7a8;
+    --ussr-ink: #1a0d0d;
+    --ussr-ink-soft: #2b1715;
+    --ussr-cream: #fff5d6;
+    --ussr-blue: #1d4e89;
+    --ussr-blue-dark: #0d2c4f;
+
+    /* Тёмные градиенты для шапки и модалок (как ночное знамя) */
+    --ussr-banner-gradient: linear-gradient(135deg, #6a0a16 0%, #3a0408 55%, #1a0408 100%);
+    --ussr-night: linear-gradient(180deg, #1a060a 0%, #0a0204 100%);
+
+    /* Тени бумаги/штампа */
+    --stamp-shadow: 4px 4px 0 rgba(74, 6, 12, 0.85);
+}
+
+/* ===== ОБЩАЯ АТМОСФЕРА: бумажный фон с лучами солнца и серпом ===== */
+
+body {
+    background:
+        /* лучи парада с верхнего края */
+        radial-gradient(ellipse 80% 60% at 50% 0%,
+            rgba(243, 197, 0, 0.10) 0%,
+            transparent 55%),
+        /* красный полусвет снизу */
+        radial-gradient(ellipse 100% 70% at 50% 100%,
+            rgba(192, 22, 42, 0.18) 0%,
+            transparent 60%),
+        /* зернистая бумага */
+        repeating-linear-gradient(45deg,
+            rgba(122, 12, 24, 0.025) 0 2px,
+            transparent 2px 5px),
+        repeating-linear-gradient(-45deg,
+            rgba(26, 13, 13, 0.04) 0 1px,
+            transparent 1px 3px),
+        linear-gradient(180deg,
+            #1a0608 0%,
+            #2a0a10 35%,
+            #1a0508 100%);
+    color: var(--ussr-ink);
+}
+
+/* Скан-линии остаются, но в более тёплых тонах */
+body::before {
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(243, 197, 0, 0.035) 0 1px,
+        transparent 1px 3px
+    );
+    mix-blend-mode: screen;
+    opacity: 0.65;
+}
+
+body::after {
+    background:
+        /* витрина: золотая виньетка */
+        radial-gradient(ellipse at center, transparent 55%, rgba(74, 6, 12, 0.55) 100%);
+}
+
+/* ===== ВЕРХНИЙ АГИТ-БАННЕР: бегущая строка лозунгов ===== */
+
+.ussr-marquee {
+    background:
+        repeating-linear-gradient(90deg,
+            #b00f23 0 18px,
+            #8a0a18 18px 36px);
+    color: var(--ussr-gold);
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    letter-spacing: 0.32rem;
+    text-transform: uppercase;
+    border-top: 3px solid var(--ussr-gold);
+    border-bottom: 3px solid var(--ussr-ink);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    position: relative;
+    z-index: 5;
+}
+
+.ussr-marquee::before,
+.ussr-marquee::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 70px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.ussr-marquee::before {
+    left: 0;
+    background: linear-gradient(90deg, #8a0a18, rgba(138, 10, 24, 0));
+}
+
+.ussr-marquee::after {
+    right: 0;
+    background: linear-gradient(-90deg, #8a0a18, rgba(138, 10, 24, 0));
+}
+
+.ussr-marquee-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 32px;
+    padding: 8px 0;
+    white-space: nowrap;
+    animation: marqueeScroll 38s linear infinite;
+    will-change: transform;
+}
+
+.ussr-marquee-track > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.ussr-marquee-track > span::before {
+    content: '★';
+    color: var(--ussr-gold);
+    font-size: 1rem;
+    text-shadow: 1px 1px 0 #000;
+}
+
+@keyframes marqueeScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+/* ===== ШАПКА: парадное полотно, лучи солнца, рамка ===== */
+
+.header {
+    background: var(--ussr-banner-gradient);
+    border-bottom: 4px solid var(--ussr-gold);
+    box-shadow:
+        0 6px 0 rgba(0, 0, 0, 0.7),
+        inset 0 0 0 2px rgba(243, 197, 0, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Лучи восходящего солнца от центра — мягкая «парадная корона» */
+.header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-conic-gradient(
+            from -90deg at 50% 130%,
+            rgba(243, 197, 0, 0.18) 0deg 4deg,
+            transparent 4deg 12deg);
+    pointer-events: none;
+    opacity: 0.55;
+    animation: sunRayBreath 9s ease-in-out infinite;
+}
+
+/* Лёгкий «шум» бумаги поверх шапки */
+.header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(135deg,
+            rgba(0, 0, 0, 0) 0 4px,
+            rgba(0, 0, 0, 0.06) 4px 5px);
+    pointer-events: none;
+    opacity: 0.5;
+    animation: none; /* отключаем стандартный shimmer из animations.css */
+}
+
+@keyframes sunRayBreath {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50%      { opacity: 0.65; transform: scale(1.05); }
+}
+
+/* Кикер сверху — больше похож на агит-надпись */
+.hero-kicker {
+    color: var(--ussr-gold);
+    text-shadow: 2px 2px 0 #000, 0 0 12px rgba(243, 197, 0, 0.4);
+    border-top: 2px solid var(--ussr-gold);
+    border-bottom: 2px solid var(--ussr-gold);
+    padding: 6px 0;
+    max-width: 720px;
+    margin: 0 auto;
+    background: linear-gradient(180deg,
+        rgba(192, 22, 42, 0.45),
+        rgba(74, 12, 18, 0.45));
+}
+
+/* Заголовок: парадные краски, мягкое мерцание */
+.title-main {
+    color: var(--ussr-gold) !important;
+    -webkit-text-fill-color: var(--ussr-gold) !important;
+    background: none !important;
+    text-shadow:
+        2px 0 var(--ussr-red),
+        -1px 0 var(--ussr-red-dark),
+        0 2px 0 #000,
+        4px 4px 0 rgba(0, 0, 0, 0.8),
+        0 0 18px rgba(243, 197, 0, 0.45);
+    animation: titlePulse 5s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+    0%, 100% { text-shadow:
+        2px 0 var(--ussr-red),
+        -1px 0 var(--ussr-red-dark),
+        0 2px 0 #000,
+        4px 4px 0 rgba(0, 0, 0, 0.8),
+        0 0 18px rgba(243, 197, 0, 0.40); }
+    50% { text-shadow:
+        2px 0 var(--ussr-red),
+        -1px 0 var(--ussr-red-dark),
+        0 2px 0 #000,
+        4px 4px 0 rgba(0, 0, 0, 0.8),
+        0 0 28px rgba(243, 197, 0, 0.85); }
+}
+
+.title-sub {
+    color: var(--ussr-cream);
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* Эмблема: золотая рамка с пульсом и тонким вращением */
+.header-emblem {
+    background:
+        radial-gradient(circle at 30% 30%, #2a0810 0%, #0a0204 100%);
+    box-shadow:
+        4px 4px 0 #000,
+        0 0 0 2px var(--ussr-gold) inset,
+        0 0 16px rgba(243, 197, 0, 0.45);
+    position: relative;
+    animation: emblemBreath 4s ease-in-out infinite;
+}
+
+.header-emblem::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-top: 2px dashed rgba(243, 197, 0, 0.4);
+    border-radius: 50%;
+    border-right: 2px dashed rgba(243, 197, 0, 0.2);
+    border-bottom: 2px dashed rgba(243, 197, 0, 0.4);
+    border-left: 2px dashed rgba(243, 197, 0, 0.2);
+    pointer-events: none;
+    animation: emblemRing 22s linear infinite;
+}
+
+.emblem-svg {
+    animation: emblemSpin 60s linear infinite;
+    transform-origin: center;
+}
+
+@keyframes emblemBreath {
+    0%, 100% { box-shadow:
+        4px 4px 0 #000,
+        0 0 0 2px var(--ussr-gold) inset,
+        0 0 14px rgba(243, 197, 0, 0.40); }
+    50% { box-shadow:
+        4px 4px 0 #000,
+        0 0 0 2px var(--ussr-gold) inset,
+        0 0 26px rgba(243, 197, 0, 0.85); }
+}
+
+@keyframes emblemRing {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes emblemSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== ГЕРОЙ-ПАНЕЛЬ: парадный плакат с лентой ===== */
+
+.hero-panel {
+    position: relative;
+}
+
+.hero-copy {
+    background:
+        linear-gradient(180deg, rgba(244, 236, 208, 0.97), rgba(234, 215, 168, 0.95));
+    color: var(--ussr-ink);
+    border-top: 4px solid var(--ussr-red);
+    border-left: 4px solid var(--ussr-red);
+    border-right: 4px solid var(--ussr-ink);
+    border-bottom: 4px solid var(--ussr-ink);
+    box-shadow: 6px 6px 0 var(--ussr-red-dark);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Тонкая ленточка золота внутри */
+.hero-copy::before {
+    border-color: rgba(192, 22, 42, 0.5);
+    border-style: dashed;
+}
+
+/* Угловые «штампы» */
+.hero-copy::after {
+    content: '☭';
+    position: absolute;
+    right: 18px;
+    bottom: 14px;
+    font-size: 4.6rem;
+    color: rgba(192, 22, 42, 0.10);
+    line-height: 1;
+    transform: rotate(-12deg);
+    pointer-events: none;
+    font-family: 'PT Serif', 'Times New Roman', serif;
+}
+
+.hero-copy-topline {
+    color: var(--ussr-red-dark);
+    text-shadow: 1px 1px 0 var(--ussr-gold);
+}
+
+.hero-lead {
+    color: var(--ussr-ink);
+    font-family: 'PT Serif', 'Times New Roman', Georgia, serif;
+    font-size: 1.22rem;
+    line-height: 1.5;
+}
+
+/* Ленточные пилюли в hero-ribbon */
+.hero-ribbon span {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    border: 2px solid var(--ussr-gold);
+    color: var(--ussr-gold);
+    box-shadow: 2px 2px 0 #000;
+    position: relative;
+    padding: 4px 14px;
+}
+
+.hero-ribbon span::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid var(--ussr-red);
+    transform: translateY(-50%);
+}
+
+.hero-ribbon span::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid var(--ussr-red-dark);
+    transform: translateY(-50%);
+}
+
+/* Постер: гигантская красная звезда с лучами */
+.hero-poster {
+    background:
+        /* лучи от центра, как агитплакат Лисицкого */
+        repeating-conic-gradient(
+            from 0deg at 50% 50%,
+            rgba(243, 197, 0, 0.18) 0deg 18deg,
+            rgba(243, 197, 0, 0.04) 18deg 36deg),
+        linear-gradient(135deg, var(--ussr-red) 0%, var(--ussr-red-deep) 100%);
+    border-top: 4px solid var(--ussr-gold);
+    border-left: 4px solid var(--ussr-gold);
+    border-right: 4px solid var(--ussr-ink);
+    border-bottom: 4px solid var(--ussr-ink);
+    box-shadow: 6px 6px 0 #000;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.hero-poster::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 2px dashed rgba(243, 197, 0, 0.55);
+    pointer-events: none;
+}
+
+.poster-star {
+    font-size: 5.6rem;
+    color: var(--ussr-gold);
+    text-shadow: 4px 4px 0 #000, 0 0 28px rgba(243, 197, 0, 0.7);
+    animation: starShine 3.2s ease-in-out infinite;
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
+@keyframes starShine {
+    0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg);
+               filter: drop-shadow(0 0 6px rgba(243, 197, 0, 0.5)); }
+    50%      { transform: translate(-50%, -50%) scale(1.08) rotate(-2deg);
+               filter: drop-shadow(0 0 18px rgba(243, 197, 0, 0.95)); }
+}
+
+.poster-ray-left,
+.poster-ray-right {
+    background: linear-gradient(180deg, rgba(243, 197, 0, 0.55), rgba(243, 197, 0, 0));
+    opacity: 0.75;
+    animation: rayWobble 6s ease-in-out infinite;
+}
+
+.poster-ray-right { animation-delay: -3s; }
+
+@keyframes rayWobble {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 0.95; }
+}
+
+.poster-copy {
+    color: var(--ussr-cream);
+    z-index: 2;
+    position: relative;
+}
+
+.poster-year {
+    color: var(--ussr-gold);
+    text-shadow: 2px 2px 0 #000;
+}
+
+.poster-copy strong {
+    color: var(--ussr-cream);
+    text-shadow: 2px 2px 0 #000;
+}
+
+/* ===== СТАТ-БАР: стилизуем под бронзовые таблички ===== */
+
+.stat-item {
+    background: linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    border-top: 3px solid var(--ussr-cream);
+    border-left: 3px solid var(--ussr-cream);
+    border-right: 3px solid var(--ussr-ink);
+    border-bottom: 3px solid var(--ussr-ink);
+    box-shadow: 4px 4px 0 var(--ussr-red-dark);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--ussr-gold) 50%,
+        transparent 100%);
+    opacity: 0.7;
+}
+
+.stat-item:hover {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+    box-shadow: 6px 6px 0 var(--ussr-red-dark);
+    animation: statShake 0.45s steps(6, end) 1;
+}
+
+@keyframes statShake {
+    0%, 100% { transform: translate(-2px, -2px) rotate(0deg); }
+    25% { transform: translate(-2px, -3px) rotate(-0.5deg); }
+    50% { transform: translate(-3px, -2px) rotate(0.4deg); }
+    75% { transform: translate(-2px, -2px) rotate(-0.3deg); }
+}
+
+.stat-value {
+    color: var(--ussr-red-dark);
+    text-shadow: 1px 1px 0 var(--ussr-gold);
+}
+
+/* ===== ПОИСК + КНОПКИ ===== */
+
+.search-inner {
+    background: var(--ussr-cream);
+    border-top: 3px solid #555;
+    border-left: 3px solid #555;
+    border-right: 3px solid #fff;
+    border-bottom: 3px solid #fff;
+    box-shadow: inset 2px 2px 0 #d8c890, 2px 2px 0 #000;
+}
+
+.search-input { color: var(--ussr-ink); }
+.search-input::placeholder { color: var(--ussr-ink-soft); opacity: 0.55; }
+
+.search-btn {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+    color: var(--ussr-ink);
+    border-top: 3px solid #ffe066;
+    border-left: 3px solid #ffe066;
+    border-right: 3px solid #804f00;
+    border-bottom: 3px solid #804f00;
+    font-family: 'Russo One', var(--font-ui);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.search-btn:hover {
+    background: linear-gradient(180deg, #ffe066 0%, #d39c00 100%);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 #000;
+}
+
+.quiz-launch-btn {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%) !important;
+    color: var(--ussr-gold) !important;
+    border-top: 3px solid #ff4060 !important;
+    border-left: 3px solid #ff4060 !important;
+    border-right: 3px solid #4a060c !important;
+    border-bottom: 3px solid #4a060c !important;
+}
+
+.quiz-launch-btn:hover {
+    filter: brightness(1.15);
+    box-shadow: 4px 4px 0 #000;
+    transform: translate(-2px, -2px);
+}
+
+/* ===== TOOLBAR: парадная панель с золотым кантом ===== */
+
+.toolbar {
+    background:
+        repeating-linear-gradient(45deg,
+            rgba(122, 12, 24, 0.04) 0 4px,
+            transparent 4px 8px),
+        linear-gradient(180deg, var(--ussr-paper) 0%, #d4c08a 100%);
+    border-top: 3px solid var(--ussr-gold);
+    border-bottom: 3px solid var(--ussr-red-dark);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.filter-label {
+    color: var(--ussr-red-dark);
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.filter-btn,
+.category-btn {
+    background: linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    color: var(--ussr-ink);
+    font-family: var(--font-ui);
+    font-weight: 600;
+}
+
+.filter-btn:hover,
+.category-btn:hover {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+    color: var(--ussr-ink);
+}
+
+.filter-btn.active,
+.filter-btn:active {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    color: var(--ussr-gold);
+    border-top: 2px solid var(--ussr-red-deep);
+    border-left: 2px solid var(--ussr-red-deep);
+    border-right: 2px solid #ff4060;
+    border-bottom: 2px solid #ff4060;
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* ===== СЕТКА ЛИЦ: каждая карточка как архивная плёнка ===== */
+
+.leader-card {
+    background:
+        linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    border-top: 4px solid var(--ussr-cream);
+    border-left: 4px solid var(--ussr-cream);
+    border-right: 4px solid var(--ussr-ink);
+    border-bottom: 4px solid var(--ussr-ink);
+    box-shadow:
+        6px 6px 0 rgba(74, 6, 12, 0.85),
+        inset 0 0 0 1px rgba(243, 197, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Угловой штамп «СЕКРЕТНО / АРХИВ» */
+.leader-card::before {
+    content: 'АРХИВ';
+    position: absolute;
+    top: 56px;
+    right: -28px;
+    transform: rotate(28deg);
+    background: rgba(192, 22, 42, 0.92);
+    color: var(--ussr-gold);
+    font-family: 'Russo One', var(--font-display);
+    font-size: 0.65rem;
+    padding: 3px 36px;
+    letter-spacing: 4px;
+    border-top: 1px dashed rgba(243, 197, 0, 0.6);
+    border-bottom: 1px dashed rgba(243, 197, 0, 0.6);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0.72;
+}
+
+.leader-card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow:
+        9px 9px 0 var(--ussr-red-dark),
+        inset 0 0 0 1px rgba(243, 197, 0, 0.5);
+}
+
+.leader-card:hover::before {
+    opacity: 1;
+    background: var(--ussr-red);
+}
+
+/* Заголовочный «фриз» карточки */
+.leader-card-header {
+    background:
+        repeating-linear-gradient(135deg,
+            rgba(0, 0, 0, 0.10) 0 4px,
+            transparent 4px 9px),
+        linear-gradient(135deg, var(--ussr-red) 0%, var(--ussr-red-deep) 100%);
+    border-bottom: 3px solid var(--ussr-gold);
+    box-shadow: inset 0 -2px 0 var(--ussr-ink);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Тонкая золотая полоска снизу */
+.leader-card-header::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 3px;
+    background: var(--ussr-gold);
+}
+
+/* Лучи в углу заголовка */
+.leader-card-header::after {
+    display: block !important;
+    content: '';
+    position: absolute;
+    left: -20%;
+    bottom: -50%;
+    width: 60%;
+    height: 200%;
+    background:
+        repeating-conic-gradient(
+            from 0deg at 0% 100%,
+            rgba(243, 197, 0, 0.20) 0deg 6deg,
+            transparent 6deg 12deg);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.leader-card:hover .leader-card-header {
+    background:
+        repeating-linear-gradient(135deg,
+            rgba(0, 0, 0, 0.10) 0 4px,
+            transparent 4px 9px),
+        linear-gradient(135deg, #d91e40 0%, var(--ussr-red-dark) 100%);
+}
+
+.leader-name {
+    color: var(--ussr-gold);
+    text-shadow: 2px 2px 0 #000;
+    font-family: 'Russo One', var(--font-display);
+}
+
+.leader-years {
+    color: var(--ussr-cream);
+    text-shadow: 1px 1px 0 #000;
+}
+
+.leader-portrait-frame {
+    background: var(--ussr-gold);
+    border-top: 3px solid var(--ussr-cream);
+    border-left: 3px solid var(--ussr-cream);
+    border-right: 3px solid var(--ussr-ink);
+    border-bottom: 3px solid var(--ussr-ink);
+    box-shadow:
+        4px 4px 0 #000,
+        inset 0 0 0 1px var(--ussr-red);
+}
+
+.leader-portrait {
+    filter: contrast(1.1) saturate(0.85) sepia(0.18);
+}
+
+.leader-portrait-placeholder {
+    background:
+        repeating-linear-gradient(45deg, #3a0810 0 4px, #1a0408 4px 8px);
+    color: var(--ussr-gold);
+}
+
+.leader-portrait-placeholder::after {
+    color: rgba(243, 197, 0, 0.85);
+    letter-spacing: 0.25rem;
+}
+
+.leader-card-body {
+    background:
+        linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    color: var(--ussr-ink);
+}
+
+.leader-summary {
+    background: rgba(243, 197, 0, 0.32);
+    border-left: 4px solid var(--ussr-red);
+    color: var(--ussr-ink);
+    font-family: 'PT Serif', Georgia, serif;
+    font-style: italic;
+    font-weight: 600;
+}
+
+.leader-position {
+    color: var(--ussr-red-dark);
+    font-family: 'Russo One', var(--font-ui);
+    letter-spacing: 1px;
+}
+
+.leader-achievements {
+    color: var(--ussr-ink-soft);
+    font-family: 'PT Serif', Georgia, serif;
+}
+
+/* Полоса быстрых фактов */
+.leader-quick-facts {
+    background: linear-gradient(180deg, var(--ussr-paper) 0%, #d4c08a 100%);
+    border-top: 2px solid var(--ussr-ink);
+    border-bottom: 2px solid var(--ussr-cream);
+}
+
+.quick-fact-value { color: var(--ussr-ink); }
+
+/* Видео-полоска */
+.leader-video-strip {
+    background:
+        repeating-linear-gradient(90deg,
+            rgba(192, 22, 42, 0.06) 0 8px,
+            transparent 8px 16px),
+        linear-gradient(180deg, var(--ussr-paper) 0%, #d4c08a 100%);
+    color: var(--ussr-ink);
+}
+
+.video-strip-label { color: var(--ussr-red-dark); }
+
+/* Бейдж эпохи */
+.era-badge {
+    background: var(--ussr-gold);
+    color: var(--ussr-ink);
+    border: 2px solid var(--ussr-ink);
+    box-shadow: 1px 1px 0 #000;
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.era-badge.era-early { background: var(--ussr-gold); }
+.era-badge.era-mid   { background: #ff8c00; }
+.era-badge.era-late  { background: #cdd17a; }
+
+/* ===== КНОПКИ В КАРТОЧКАХ ===== */
+
+.btn-primary {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    color: var(--ussr-gold);
+    border-top: 3px solid #ff4060;
+    border-left: 3px solid #ff4060;
+    border-right: 3px solid var(--ussr-red-deep);
+    border-bottom: 3px solid var(--ussr-red-deep);
+    text-shadow: 1px 1px 0 #000;
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(180deg, #d91e40 0%, var(--ussr-red-dark) 100%);
+    transform: translate(-1px, -1px);
+}
+
+.btn-secondary {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+    color: var(--ussr-ink);
+    border-top: 3px solid #ffe066;
+    border-left: 3px solid #ffe066;
+    border-right: 3px solid #804f00;
+    border-bottom: 3px solid #804f00;
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.btn-chat {
+    background: linear-gradient(180deg, var(--ussr-blue) 0%, var(--ussr-blue-dark) 100%);
+    color: var(--ussr-gold);
+    border-top: 3px solid #3878c5;
+    border-left: 3px solid #3878c5;
+    border-right: 3px solid var(--ussr-blue-dark);
+    border-bottom: 3px solid var(--ussr-blue-dark);
+    text-shadow: 1px 1px 0 #000;
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.btn-chat:hover { background: linear-gradient(180deg, #2868a8 0%, var(--ussr-blue-dark) 100%); }
+
+/* ===== TIMELINE ===== */
+
+.timeline-track {
+    background:
+        repeating-linear-gradient(180deg,
+            var(--ussr-gold) 0 8px,
+            var(--ussr-red-dark) 8px 12px);
+    box-shadow: 0 0 8px rgba(243, 197, 0, 0.45);
+}
+
+.timeline-dot {
+    background: var(--ussr-gold);
+    border: 3px solid var(--ussr-ink);
+    box-shadow:
+        0 0 0 2px var(--ussr-red),
+        2px 2px 0 #000;
+    position: relative;
+}
+
+.timeline-dot::before {
+    content: '★';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ussr-red-dark);
+    font-size: 12px;
+    line-height: 1;
+}
+
+.timeline-card {
+    background:
+        linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    border-top: 3px solid var(--ussr-cream);
+    border-left: 3px solid var(--ussr-cream);
+    border-right: 3px solid var(--ussr-ink);
+    border-bottom: 3px solid var(--ussr-ink);
+    box-shadow: 4px 4px 0 var(--ussr-red-dark);
+}
+
+.timeline-card:hover {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+    box-shadow: 6px 6px 0 #000;
+}
+
+.timeline-year { color: var(--ussr-red-dark); }
+.timeline-name { color: var(--ussr-ink); }
+.timeline-position { color: var(--ussr-ink-soft); }
+
+/* ===== МОДАЛКА: парадная папка ===== */
+
+.modal {
+    background:
+        radial-gradient(ellipse at center, rgba(74, 6, 12, 0.55) 0%, rgba(0, 0, 0, 0.95) 100%);
+}
+
+.modal-content {
+    background:
+        linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    border-top: 4px solid var(--ussr-cream);
+    border-left: 4px solid var(--ussr-cream);
+    border-right: 4px solid var(--ussr-ink);
+    border-bottom: 4px solid var(--ussr-ink);
+    box-shadow:
+        10px 10px 0 #000,
+        inset 0 0 0 2px var(--ussr-gold);
+}
+
+.modal-header {
+    background:
+        repeating-linear-gradient(45deg,
+            rgba(0, 0, 0, 0) 0 8px,
+            rgba(0, 0, 0, 0.08) 8px 10px),
+        linear-gradient(135deg, var(--ussr-red) 0%, var(--ussr-red-deep) 100%);
+    border-bottom: 4px solid var(--ussr-gold);
+}
+
+.modal-header::before {
+    background:
+        repeating-conic-gradient(
+            from -90deg at 100% 100%,
+            rgba(243, 197, 0, 0.15) 0deg 6deg,
+            transparent 6deg 12deg);
+    opacity: 0.6;
+}
+
+.modal-title {
+    color: var(--ussr-gold);
+    text-shadow: 2px 2px 0 #000;
+    font-family: 'Russo One', var(--font-display);
+}
+
+.modal-subtitle { color: var(--ussr-cream); }
+
+.modal-description {
+    color: var(--ussr-cream);
+    border-top: 2px dashed var(--ussr-gold);
+    font-family: 'PT Serif', Georgia, serif;
+}
+
+.modal-portrait {
+    border-top: 3px solid var(--ussr-gold);
+    border-left: 3px solid var(--ussr-gold);
+    border-right: 3px solid var(--ussr-ink);
+    border-bottom: 3px solid var(--ussr-ink);
+    box-shadow: 4px 4px 0 #000;
+    filter: contrast(1.1) saturate(0.85) sepia(0.18);
+}
+
+.modal-era-badge {
+    background: var(--ussr-gold);
+    color: var(--ussr-ink);
+    border: 2px solid var(--ussr-ink);
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.modal-body {
+    background:
+        linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    color: var(--ussr-ink);
+}
+
+.section-title {
+    color: var(--ussr-red-dark);
+    font-family: 'Russo One', var(--font-display);
+}
+
+.section-title::after {
+    background: repeating-linear-gradient(90deg,
+        var(--ussr-red) 0 6px,
+        transparent 6px 10px);
+}
+
+.info-item {
+    background: var(--ussr-cream);
+    border-top: 2px solid var(--ussr-ink);
+    border-left: 2px solid var(--ussr-ink);
+    border-right: 2px solid var(--ussr-cream);
+    border-bottom: 2px solid var(--ussr-cream);
+    box-shadow: 2px 2px 0 rgba(74, 6, 12, 0.55);
+}
+
+.info-item:hover {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+}
+
+.info-label { color: var(--ussr-red-dark); font-family: 'Russo One', var(--font-ui); }
+.info-value { color: var(--ussr-ink); }
+
+.facts-list li {
+    background: var(--ussr-cream);
+    border-top: 2px solid var(--ussr-ink-soft);
+    border-left: 4px solid var(--ussr-red);
+    border-right: 2px solid var(--ussr-cream);
+    border-bottom: 2px solid var(--ussr-cream);
+    box-shadow: 2px 2px 0 rgba(74, 6, 12, 0.55);
+    color: var(--ussr-ink);
+    font-family: 'PT Serif', Georgia, serif;
+}
+
+.facts-list li::before { color: var(--ussr-red); }
+
+.biography-text,
+.legacy-text {
+    background: var(--ussr-cream);
+    border-top: 2px solid var(--ussr-ink-soft);
+    border-left: 4px solid var(--ussr-red);
+    border-right: 2px solid var(--ussr-cream);
+    border-bottom: 2px solid var(--ussr-cream);
+    box-shadow: 2px 2px 0 rgba(74, 6, 12, 0.55);
+    color: var(--ussr-ink);
+    font-family: 'PT Serif', Georgia, serif;
+    line-height: 1.65;
+}
+
+.video-section {
+    background:
+        repeating-linear-gradient(45deg, rgba(192, 22, 42, 0.10) 0 6px, transparent 6px 12px),
+        var(--ussr-cream);
+    border-top: 3px solid var(--ussr-cream);
+    border-left: 3px solid var(--ussr-cream);
+    border-right: 3px solid var(--ussr-ink);
+    border-bottom: 3px solid var(--ussr-ink);
+}
+
+.sig-bar {
+    border-top: 2px solid var(--ussr-ink);
+    border-left: 2px solid var(--ussr-ink);
+    border-right: 2px solid var(--ussr-cream);
+    border-bottom: 2px solid var(--ussr-cream);
+    background: #14080a;
+}
+
+.sig-bar-fill {
+    background: repeating-linear-gradient(90deg,
+        var(--ussr-gold) 0 8px,
+        var(--ussr-gold-deep) 8px 10px);
+    box-shadow: 0 0 8px rgba(243, 197, 0, 0.55);
+}
+
+/* ===== ЧАТ ===== */
+
+.chat-header {
+    background:
+        repeating-linear-gradient(45deg, rgba(0, 0, 0, 0) 0 8px, rgba(0, 0, 0, 0.08) 8px 10px),
+        linear-gradient(135deg, var(--ussr-red) 0%, var(--ussr-red-deep) 100%);
+    border-bottom: 3px solid var(--ussr-gold);
+}
+
+.chat-header-title { color: var(--ussr-gold); }
+.chat-header-sub { color: var(--ussr-cream); }
+
+.chat-log {
+    background:
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 3px),
+        var(--ussr-cream);
+}
+
+.chat-msg-user {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+    color: var(--ussr-ink);
+    border-top: 2px solid #ffe066;
+    border-left: 2px solid #ffe066;
+    border-right: 2px solid #804f00;
+    border-bottom: 2px solid #804f00;
+}
+
+.chat-msg-assistant {
+    background: var(--ussr-cream);
+    color: var(--ussr-ink);
+}
+
+.chat-status.online   { background: #b6ff3a; }
+.chat-status.offline  { background: #ff6b6b; }
+.chat-status.checking { background: var(--ussr-gold); }
+
+.chat-send-btn {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    color: var(--ussr-gold);
+    border-top: 3px solid #ff4060;
+    border-left: 3px solid #ff4060;
+    border-right: 3px solid var(--ussr-red-deep);
+    border-bottom: 3px solid var(--ussr-red-deep);
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.chat-send-btn:hover:not(:disabled) { background: linear-gradient(180deg, #d91e40 0%, var(--ussr-red-dark) 100%); }
+
+/* ===== СПИННЕР: красная звезда в золотом круге ===== */
+
+.spinner-wrapper {
+    width: 72px;
+    height: 72px;
+}
+
+.spinner {
+    border-color: var(--ussr-ink);
+    border-top-color: var(--ussr-gold);
+    border-right-color: var(--ussr-red);
+    width: 56px;
+    height: 56px;
+    top: 8px;
+    left: 8px;
+}
+
+.spinner-ring {
+    border-color: var(--ussr-gold);
+    border-bottom-color: transparent;
+    width: 72px;
+    height: 72px;
+}
+
+.loading p {
+    color: var(--ussr-gold);
+    font-family: 'Russo One', var(--font-display);
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 2px;
+}
+
+/* ===== ФУТЕР: парадный нижний фриз ===== */
+
+.footer {
+    background: var(--ussr-night);
+    border-top: 4px solid var(--ussr-gold);
+    position: relative;
+    overflow: hidden;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-conic-gradient(
+            from 90deg at 50% -50%,
+            rgba(243, 197, 0, 0.12) 0deg 6deg,
+            transparent 6deg 12deg);
+    pointer-events: none;
+    opacity: 0.45;
+}
+
+.footer-content { position: relative; z-index: 1; }
+
+.footer-emblem {
+    color: var(--ussr-gold);
+    text-shadow: 0 0 12px rgba(243, 197, 0, 0.6);
+    animation: emblemBreath 4s ease-in-out infinite;
+    display: inline-block;
+}
+
+.footer-logo { color: var(--ussr-gold); }
+.footer-desc { color: var(--ussr-cream); }
+.footer-copy { color: rgba(244, 236, 208, 0.55); }
+
+/* Печать-штамп в футере */
+.ussr-stamp {
+    margin: 14px auto 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 168px;
+    height: 168px;
+    border: 4px double var(--ussr-red);
+    border-radius: 50%;
+    color: var(--ussr-red);
+    font-family: 'Russo One', var(--font-display);
+    text-align: center;
+    line-height: 1.1;
+    transform: rotate(-6deg);
+    box-shadow: inset 0 0 0 2px rgba(192, 22, 42, 0.25);
+    opacity: 0.85;
+    animation: stampImprint 1.4s ease-out 0.4s both;
+    position: relative;
+}
+
+.ussr-stamp::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px dashed var(--ussr-red);
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+.ussr-stamp-text {
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 18px;
+}
+
+.ussr-stamp-text .ussr-stamp-star {
+    display: block;
+    font-size: 1.6rem;
+    margin: 2px 0;
+}
+
+@keyframes stampImprint {
+    0%   { transform: rotate(-6deg) scale(2.4); opacity: 0; filter: blur(6px); }
+    60%  { transform: rotate(-6deg) scale(0.96); opacity: 1; filter: blur(0); }
+    100% { transform: rotate(-6deg) scale(1); opacity: 0.85; filter: blur(0); }
+}
+
+/* ===== UVENU: бегущая лента событий и графа ===== */
+
+.events-view,
+.graph-view {
+    background:
+        repeating-linear-gradient(45deg, rgba(122, 12, 24, 0.05) 0 4px, transparent 4px 9px),
+        linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    color: var(--ussr-ink);
+    border: 4px solid var(--ussr-gold);
+    box-shadow: 6px 6px 0 var(--ussr-red-dark);
+}
+
+.events-title,
+.graph-title {
+    color: var(--ussr-red-dark);
+    font-family: 'Russo One', var(--font-display);
+    text-shadow: 1px 1px 0 var(--ussr-gold);
+}
+
+.events-subtitle,
+.graph-subtitle {
+    color: var(--ussr-ink-soft);
+}
+
+.events-year-section {
+    border-left: 4px solid var(--ussr-red);
+}
+
+.events-year-heading {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    color: var(--ussr-gold);
+    border: 2px solid var(--ussr-gold);
+    font-family: 'Russo One', var(--font-display);
+    box-shadow: 2px 2px 0 #000;
+}
+
+.event-card {
+    background: var(--ussr-cream);
+    border: 2px solid var(--ussr-ink-soft);
+    color: var(--ussr-ink);
+    box-shadow: 4px 4px 0 var(--ussr-red-dark);
+}
+
+.event-card-date {
+    color: var(--ussr-red-dark);
+    font-family: 'Russo One', var(--font-display);
+}
+
+.event-card-title {
+    color: var(--ussr-ink);
+    font-family: 'Russo One', var(--font-display);
+}
+
+.event-card-desc {
+    color: var(--ussr-ink-soft);
+    font-family: 'PT Serif', Georgia, serif;
+}
+
+.event-leader-chip {
+    background: rgba(192, 22, 42, 0.10);
+    border: 1px solid var(--ussr-red);
+    color: var(--ussr-red-dark);
+}
+
+.event-leader-chip:hover {
+    background: var(--ussr-red);
+    color: var(--ussr-gold);
+}
+
+.events-empty { color: var(--ussr-ink-soft); }
+
+.graph-canvas-wrap {
+    background: var(--ussr-cream);
+    border: 2px solid var(--ussr-ink);
+}
+
+.graph-tooltip {
+    background: var(--ussr-ink);
+    color: var(--ussr-gold);
+    border: 1px solid var(--ussr-gold);
+}
+
+/* ===== QUIZ ===== */
+
+.quiz-modal-content {
+    background: linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    border: 4px solid var(--ussr-red-dark);
+}
+
+.quiz-header {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-deep) 100%);
+    color: var(--ussr-gold);
+    border-bottom: 3px solid var(--ussr-gold);
+}
+
+.quiz-header-title { font-family: 'Russo One', var(--font-display); }
+
+.quiz-score-pill {
+    background: rgba(243, 197, 0, 0.18);
+    border: 1px solid var(--ussr-gold);
+    color: var(--ussr-gold);
+}
+
+.quiz-portrait {
+    border: 4px solid var(--ussr-red);
+    box-shadow: 6px 6px 0 var(--ussr-gold-deep);
+    filter: contrast(1.1) saturate(0.85) sepia(0.18);
+}
+
+.quiz-hint-pill {
+    background: var(--ussr-ink);
+    color: var(--ussr-gold);
+    border: 2px solid var(--ussr-gold);
+}
+
+.quiz-option {
+    background: var(--ussr-cream);
+    border: 2px solid var(--ussr-ink);
+    color: var(--ussr-ink);
+    font-family: 'PT Serif', Georgia, serif;
+}
+
+.quiz-option:hover:not(:disabled) {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+}
+
+.quiz-option-correct { background: #b6ff3a !important; color: var(--ussr-ink); }
+.quiz-option-wrong   { background: #ff5577 !important; color: #fff; }
+
+/* ===== TTS ===== */
+
+.btn-tts {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+    color: var(--ussr-ink);
+    border: 2px solid var(--ussr-ink);
+    font-family: 'Russo One', var(--font-ui);
+}
+
+.btn-tts-active {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    color: var(--ussr-gold);
+}
+
+/* ===== TOAST ===== */
+
+.toast {
+    background: var(--ussr-ink);
+    color: var(--ussr-gold);
+    border-top: 3px solid var(--ussr-gold);
+    border-left: 3px solid var(--ussr-gold);
+    border-right: 3px solid var(--ussr-red-deep);
+    border-bottom: 3px solid var(--ussr-red-deep);
+    font-family: 'Russo One', var(--font-body);
+}
+
+/* ===== ДЕКОРАТИВНЫЕ ЭЛЕМЕНТЫ: пшеничные колосья и серпы у эмблемы ===== */
+
+.header-emblem-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    position: relative;
+}
+
+.wheat-ear {
+    width: 48px;
+    height: 84px;
+    color: var(--ussr-gold);
+    opacity: 0.92;
+    filter: drop-shadow(2px 2px 0 #000);
+    animation: wheatSway 5s ease-in-out infinite;
+    transform-origin: bottom center;
+}
+
+.wheat-ear-left {
+    transform: scaleX(-1);
+    animation-delay: -1.5s;
+}
+
+@keyframes wheatSway {
+    0%, 100% { transform: rotate(-2deg); }
+    50%      { transform: rotate(2deg); }
+}
+
+.wheat-ear-left {
+    animation-name: wheatSwayLeft;
+}
+
+@keyframes wheatSwayLeft {
+    0%, 100% { transform: scaleX(-1) rotate(-2deg); }
+    50%      { transform: scaleX(-1) rotate(2deg); }
+}
+
+/* ===== АНИМАЦИЯ КРАСНОГО ФЛАГА (декоративный угол) ===== */
+
+.ussr-flag-corner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 220px;
+    pointer-events: none;
+    z-index: 4;
+    overflow: hidden;
+}
+
+.ussr-flag-corner::before {
+    content: '';
+    position: absolute;
+    inset: -10% -50% -50% -10%;
+    background:
+        repeating-linear-gradient(45deg,
+            rgba(0, 0, 0, 0.1) 0 6px,
+            transparent 6px 12px),
+        linear-gradient(135deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    transform: rotate(-25deg);
+    box-shadow: inset -6px -6px 0 var(--ussr-red-deep);
+    animation: flagWave 6s ease-in-out infinite;
+    transform-origin: top left;
+}
+
+.ussr-flag-corner-text {
+    position: absolute;
+    top: 38px;
+    left: 14px;
+    transform: rotate(-25deg);
+    color: var(--ussr-gold);
+    font-family: 'Russo One', var(--font-display);
+    font-size: 0.78rem;
+    letter-spacing: 4px;
+    text-shadow: 2px 2px 0 #000;
+    text-transform: uppercase;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ussr-flag-corner-text::before {
+    content: '☭';
+    font-size: 1.4rem;
+    color: var(--ussr-gold);
+}
+
+@keyframes flagWave {
+    0%, 100% { transform: rotate(-25deg) skewY(0deg); }
+    50%      { transform: rotate(-24deg) skewY(1.2deg); }
+}
+
+/* ===== ВОЛНА ПРИ НАВЕДЕНИИ НА КАРТОЧКУ — солнечный блик ===== */
+
+.leader-card,
+.timeline-card,
+.event-card {
+    position: relative;
+}
+
+.leader-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(60deg,
+        transparent 0%,
+        rgba(243, 197, 0, 0.25) 50%,
+        transparent 100%);
+    pointer-events: none;
+    transition: left 0.6s ease;
+    z-index: 3;
+}
+
+.leader-card:hover::after {
+    left: 130%;
+}
+
+/* ===== СКРОЛЛБАР ===== */
+::-webkit-scrollbar {
+    width: 14px;
+    background: var(--ussr-paper);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--ussr-red) 0%, var(--ussr-red-dark) 100%);
+    border-top: 2px solid var(--ussr-cream);
+    border-left: 2px solid var(--ussr-cream);
+    border-right: 2px solid var(--ussr-red-deep);
+    border-bottom: 2px solid var(--ussr-red-deep);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--ussr-gold) 0%, var(--ussr-gold-deep) 100%);
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+
+@media (max-width: 768px) {
+    .ussr-flag-corner { width: 140px; height: 140px; }
+    .ussr-flag-corner-text { font-size: 0.65rem; letter-spacing: 2px; top: 22px; }
+    .wheat-ear { width: 32px; height: 56px; }
+    .ussr-marquee { font-size: 0.62rem; letter-spacing: 0.2rem; }
+    .hero-poster { min-height: 180px; }
+    .poster-star { font-size: 4rem; }
+    .ussr-stamp { width: 132px; height: 132px; }
+    .ussr-stamp-text { font-size: 0.68rem; padding: 14px; }
+}
+
+@media (max-width: 480px) {
+    .ussr-flag-corner { display: none; }
+}
+
+/* ===== ANIMATION REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    .ussr-marquee-track,
+    .emblem-svg,
+    .header-emblem,
+    .header-emblem::before,
+    .poster-star,
+    .poster-ray-left,
+    .poster-ray-right,
+    .wheat-ear,
+    .ussr-flag-corner::before,
+    .footer-emblem,
+    .title-main,
+    .stat-item:hover {
+        animation: none !important;
+    }
+}
