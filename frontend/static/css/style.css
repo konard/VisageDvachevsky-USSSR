@@ -602,6 +602,67 @@ body::after {
     border-bottom: 2px solid #fff;
 }
 
+/* ===== CATEGORY FILTER (Win9x toolbar row #2) ===== */
+.toolbar-content-secondary {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dotted rgba(0, 0, 0, 0.25);
+    justify-content: flex-start;
+}
+
+.category-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 5px 11px;
+    border-top: 2px solid #fff;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #555;
+    border-bottom: 2px solid #555;
+    background: var(--color-bone);
+    color: var(--color-text);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-family: var(--font-ui);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.category-btn-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.category-btn:hover {
+    background: var(--color-secondary);
+}
+
+.category-btn:active,
+.category-btn.active {
+    background: var(--color-primary);
+    color: var(--color-white);
+    border-top: 2px solid #555;
+    border-left: 2px solid #555;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    font-weight: 700;
+}
+
+.category-btn.category-politics.active { background: #c41e3a; color: #fff; }
+.category-btn.category-military.active { background: #6b6b1f; color: #fff; }
+.category-btn.category-space.active    { background: #1a4f8f; color: #fff; }
+.category-btn.category-science.active  { background: #1f7a6b; color: #fff; }
+.category-btn.category-culture.active  { background: #6a2c91; color: #fff; }
+.category-btn.category-sports.active   { background: #d96b0c; color: #fff; }
+.category-btn.category-labor.active    { background: #b89b00; color: #000; }
+
 /* ===== MAIN CONTENT ===== */
 .main-content {
     flex: 1;
@@ -722,6 +783,40 @@ body::after {
 .era-badge.era-early { background: #ffd700; color: #000; }
 .era-badge.era-mid   { background: #ff8c00; color: #000; }
 .era-badge.era-late  { background: #00ff7f; color: #000; }
+
+.category-badge {
+    align-self: flex-start;
+    margin-bottom: 6px;
+    padding: 3px 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 1;
+    font-family: var(--font-ui);
+    border: 2px solid #000;
+    background: var(--color-bone);
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 2px 2px 0 #000;
+    position: relative;
+    max-width: calc(100% - 120px);
+}
+
+.category-badge-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.category-badge.category-politics { background: #c41e3a; color: #fff; }
+.category-badge.category-military { background: #6b6b1f; color: #fff; }
+.category-badge.category-space    { background: #1a4f8f; color: #fff; }
+.category-badge.category-science  { background: #1f7a6b; color: #fff; }
+.category-badge.category-culture  { background: #6a2c91; color: #fff; }
+.category-badge.category-sports   { background: #d96b0c; color: #fff; }
+.category-badge.category-labor    { background: #ffd700; color: #000; }
 
 .significance-dots {
     position: absolute;
@@ -1956,3 +2051,347 @@ body::after {
 }
 
 html { scroll-behavior: smooth; }
+
+/* ============================================================
+ * QUIZ MODAL  — «Кто на портрете?»
+ * ============================================================ */
+.quiz-launch-btn { background: linear-gradient(180deg, #ffd700, #b88a00); color: #1a0f30; }
+.quiz-launch-btn:hover { filter: brightness(1.1); }
+
+.quiz-modal.active { display: flex; }
+.quiz-modal-content {
+    max-width: 620px;
+    width: 96%;
+    background: linear-gradient(180deg, #ece9d8 0%, #d8d8b8 100%);
+    color: var(--color-text);
+    border: 3px solid #1a0f30;
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.65);
+    padding: 0;
+    overflow: hidden;
+}
+.quiz-header {
+    background: linear-gradient(180deg, #1a0f30 0%, #2a1a4a 100%);
+    color: #ffd700;
+    padding: 14px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #c41e3a;
+}
+.quiz-header-title {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+.quiz-header-scores {
+    display: flex;
+    gap: 8px;
+}
+.quiz-score-pill {
+    background: rgba(255, 215, 0, 0.12);
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    padding: 4px 10px;
+    font-family: var(--font-pixel);
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.quiz-score-label {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    opacity: 0.75;
+}
+.quiz-body {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.quiz-loading,
+.quiz-error {
+    text-align: center;
+    color: #1a1a1a;
+    font-size: 1.05rem;
+    padding: 32px 0;
+}
+.quiz-error .quiz-retry-btn { margin-top: 14px; }
+
+.quiz-portrait-frame {
+    position: relative;
+    align-self: center;
+    width: 220px;
+}
+.quiz-portrait {
+    width: 220px;
+    height: 280px;
+    object-fit: cover;
+    border: 4px solid #1a0f30;
+    box-shadow: 6px 6px 0 #c41e3a;
+    background: #14142a;
+    display: block;
+}
+.quiz-portrait-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: #ffd700;
+    background: #14142a;
+}
+.quiz-portrait-hint {
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.quiz-hint-pill {
+    background: #14142a;
+    color: #ffd700;
+    padding: 4px 10px;
+    border: 2px solid #ffd700;
+    font-size: 0.85rem;
+    font-family: var(--font-pixel);
+}
+.quiz-hint-category {
+    background: #c41e3a;
+    color: #fff;
+    border-color: #ffd700;
+}
+.quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+}
+.quiz-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 2px solid #1a0f30;
+    padding: 12px 14px;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-ui);
+    font-size: 0.98rem;
+    color: #1a1a1a;
+    transition: background 0.15s steps(4, end);
+}
+.quiz-option:hover:not(:disabled) {
+    background: #ffd700;
+    color: #1a0f30;
+}
+.quiz-option:disabled { cursor: default; }
+.quiz-option-bullet { color: #c41e3a; }
+.quiz-option-name { flex: 1; }
+.quiz-option-correct {
+    background: #b6ff3a !important;
+    border-color: #2a5a10 !important;
+    color: #14142a;
+    font-weight: 700;
+}
+.quiz-option-wrong {
+    background: #ff5577 !important;
+    border-color: #7a0d1d !important;
+    color: #14142a;
+    font-weight: 700;
+}
+.quiz-achievements-hint {
+    background: rgba(26, 15, 48, 0.08);
+    border-left: 4px solid #c41e3a;
+    padding: 10px 12px;
+    font-size: 0.92rem;
+    color: #2a1a4a;
+}
+.quiz-feedback { min-height: 1.4em; font-size: 1rem; }
+.quiz-feedback-ok  { color: #2a5a10; }
+.quiz-feedback-bad { color: #7a0d1d; }
+.quiz-actions { display: flex; justify-content: flex-end; }
+
+/* ============================================================
+ * EVENTS — Хроника эпохи 1917–1991
+ * ============================================================ */
+.events-view {
+    background: linear-gradient(180deg, rgba(20, 20, 42, 0.85), rgba(10, 10, 24, 0.95));
+    color: #e8e8d0;
+    border: 3px solid #ffd700;
+    padding: 24px 24px 36px;
+    box-shadow: 6px 6px 0 rgba(196, 30, 58, 0.55);
+}
+.events-header { margin-bottom: 18px; }
+.events-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: #ffd700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+}
+.events-subtitle { color: #d8d8b8; font-size: 0.95rem; }
+.events-list { display: flex; flex-direction: column; gap: 22px; }
+.events-year-section {
+    border-left: 3px solid #c41e3a;
+    padding-left: 16px;
+    position: relative;
+}
+.events-year-heading {
+    font-family: var(--font-display);
+    color: #ffd700;
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, #1a0f30 0%, #14142a 100%);
+    display: inline-block;
+    padding: 4px 12px;
+    border: 2px solid #ffd700;
+}
+.events-year-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.event-card {
+    background: rgba(26, 15, 48, 0.85);
+    border: 2px solid rgba(255, 215, 0, 0.45);
+    padding: 14px 16px;
+    color: #e8e8d0;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.event-card-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.event-card-date { color: #ffd700; font-family: var(--font-pixel); font-size: 0.92rem; }
+.event-card-category {
+    background: #c41e3a;
+    color: #fff;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.event-card-category.category-military { background: #ffd700; color: #1a0f30; }
+.event-card-category.category-space    { background: #3a99ff; }
+.event-card-category.category-science  { background: #7ddc3a; color: #14142a; }
+.event-card-category.category-culture  { background: #ff6ad5; }
+.event-card-category.category-sports   { background: #ff8c00; }
+.event-card-category.category-labor    { background: #b88a00; }
+.event-card-title { font-family: var(--font-display); font-size: 0.95rem; color: #fff; }
+.event-card-desc { font-size: 0.95rem; color: #d8d8b8; line-height: 1.4; }
+.event-card-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.event-leader-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid #ffd700;
+    color: #ffd700;
+    padding: 3px 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: var(--font-ui);
+}
+.event-leader-chip:hover { background: #ffd700; color: #1a0f30; }
+.event-leader-chip-img { width: 22px; height: 22px; object-fit: cover; border: 1px solid #1a0f30; }
+.events-empty { color: #d8d8b8; padding: 32px; text-align: center; }
+
+/* ============================================================
+ * CONNECTIONS GRAPH
+ * ============================================================ */
+.graph-view {
+    background: linear-gradient(180deg, rgba(20, 20, 42, 0.9), rgba(10, 10, 24, 0.95));
+    color: #e8e8d0;
+    border: 3px solid #3a99ff;
+    padding: 24px;
+    box-shadow: 6px 6px 0 rgba(58, 153, 255, 0.55);
+}
+.graph-header { margin-bottom: 14px; }
+.graph-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: #3a99ff;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+}
+.graph-subtitle { color: #d8d8b8; font-size: 0.95rem; margin-bottom: 10px; }
+.graph-legend { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; color: #e8e8d0; font-size: 0.9rem; }
+.legend-swatch { background: rgba(0,0,0,0.4); padding: 2px; border: 1px solid rgba(255,255,255,0.15); }
+.legend-label { text-transform: lowercase; }
+
+.graph-canvas-wrap {
+    position: relative;
+    margin-top: 14px;
+    background: #0a0a18;
+    border: 2px solid #14142a;
+    overflow: hidden;
+}
+#graphCanvas {
+    display: block;
+    width: 100%;
+    height: 560px;
+    cursor: grab;
+}
+.graph-tooltip {
+    position: absolute;
+    background: #14142a;
+    color: #ffd700;
+    border: 1px solid #ffd700;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    pointer-events: none;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+    z-index: 5;
+}
+
+/* ============================================================
+ * TTS BUTTON in leader modal
+ * ============================================================ */
+.modal-tts-wrap {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.btn-tts {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(180deg, #ffd700, #b88a00);
+    color: #1a0f30;
+    border: 2px solid #1a0f30;
+    padding: 8px 14px;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    font-weight: 700;
+}
+.btn-tts:hover { filter: brightness(1.06); }
+.btn-tts-active {
+    background: linear-gradient(180deg, #c41e3a, #7a0d1d);
+    color: #fff;
+    animation: ttsPulse 1.6s steps(8, end) infinite;
+}
+@keyframes ttsPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(196,30,58,0); } 50% { box-shadow: 0 0 0 6px rgba(196,30,58,0.45); } }
+.tts-hint { color: #d8d8b8; font-size: 0.85rem; }
+
+/* ============================================================
+ * VIEW TOGGLE EXTRAS
+ * ============================================================ */
+.view-btn-label {
+    margin-left: 4px;
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    text-transform: lowercase;
+}
+@media (max-width: 768px) {
+    .view-btn-label { display: none; }
+    .events-year-list { grid-template-columns: 1fr; }
+    .quiz-options { grid-template-columns: 1fr; }
+    .quiz-portrait { width: 180px; height: 230px; }
+    .quiz-portrait-frame { width: 180px; }
+    #graphCanvas { height: 420px; }
+}

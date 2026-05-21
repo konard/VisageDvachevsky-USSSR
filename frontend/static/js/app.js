@@ -5,9 +5,24 @@
 
 // ===== STATE =====
 let allLeaders = [];
-let currentView = 'grid';   // 'grid' | 'timeline'
+let currentView = 'grid';   // 'grid' | 'timeline' | 'events' | 'graph'
 let currentFilter = 'all';  // 'all' | 'early' | 'mid' | 'late'
+let currentCategory = 'all'; // 'all' | 'politics' | 'military' | 'space' | 'science' | 'culture' | 'sports' | 'labor'
 const VIDEO_PLACEHOLDER_TEXT = 'Архивный ролик готовится';
+
+const CATEGORY_META = {
+    politics: { label: 'Политика',  icon: '☭' },
+    military: { label: 'Армия',     icon: '★' },
+    space:    { label: 'Космос',    icon: '🚀' },
+    science:  { label: 'Наука',     icon: '⚛' },
+    culture:  { label: 'Культура',  icon: '🎭' },
+    sports:   { label: 'Спорт',     icon: '⚽' },
+    labor:    { label: 'Труд',      icon: '⚒' },
+};
+
+function getCategoryMeta(category) {
+    return CATEGORY_META[category] || { label: 'Эпоха', icon: '✦' };
+}
 
 // ===== DOM REFS =====
 const leadersGrid      = document.getElementById('leadersGrid');
@@ -30,6 +45,10 @@ const videoTitle       = document.getElementById('videoTitle');
 const toast            = document.getElementById('toast');
 const gridViewBtn      = document.getElementById('gridViewBtn');
 const timelineViewBtn  = document.getElementById('timelineViewBtn');
+const eventsViewBtn    = document.getElementById('eventsViewBtn');
+const graphViewBtn     = document.getElementById('graphViewBtn');
+const eventsView       = document.getElementById('eventsView');
+const graphView        = document.getElementById('graphView');
 const leaderCountEl    = document.getElementById('leaderCount');
 
 // Chat refs
@@ -66,6 +85,7 @@ async function loadLeaders() {
 
         const payload = await response.json();
         allLeaders = normalizeLeadersResponse(payload);
+        window.allLeaders = allLeaders;
 
         // Update count in header
         if (leaderCountEl) leaderCountEl.textContent = allLeaders.length;
@@ -92,8 +112,29 @@ function getEraLabel(era) {
 }
 
 // ===== RENDER LEADERS =====
+function setActiveView(view) {
+    leadersGrid.style.display  = view === 'grid'     ? '' : 'none';
+    timelineView.style.display = view === 'timeline' ? 'block' : 'none';
+    if (eventsView) eventsView.style.display = view === 'events' ? 'block' : 'none';
+    if (graphView)  graphView.style.display  = view === 'graph'  ? 'block' : 'none';
+}
+
 function renderLeaders(leaders) {
-    const filtered = filterLeaders(leaders, currentFilter);
+    if (currentView === 'events') {
+        setActiveView('events');
+        noResults.style.display = 'none';
+        window.showEventsView?.();
+        return;
+    }
+    if (currentView === 'graph') {
+        setActiveView('graph');
+        noResults.style.display = 'none';
+        window.showGraphView?.();
+        return;
+    }
+
+    let filtered = filterLeaders(leaders, currentFilter);
+    filtered = filterLeadersByCategory(filtered, currentCategory);
 
     if (currentView === 'timeline') {
         renderTimeline(filtered);
@@ -107,10 +148,14 @@ function filterLeaders(leaders, filter) {
     return leaders.filter(l => getEra(l) === filter);
 }
 
+function filterLeadersByCategory(leaders, category) {
+    if (!category || category === 'all') return leaders;
+    return leaders.filter(l => l.category === category);
+}
+
 function renderGrid(leaders) {
     leadersGrid.innerHTML = '';
-    timelineView.style.display = 'none';
-    leadersGrid.style.display = '';
+    setActiveView('grid');
 
     if (leaders.length === 0) {
         noResults.style.display = 'block';
@@ -127,8 +172,7 @@ function renderGrid(leaders) {
 
 function renderTimeline(leaders) {
     timelineItems.innerHTML = '';
-    leadersGrid.style.display = 'none';
-    timelineView.style.display = 'block';
+    setActiveView('timeline');
 
     if (leaders.length === 0) {
         noResults.style.display = 'block';
@@ -154,6 +198,7 @@ function createLeaderCard(leader, idx) {
 
     const era = getEra(leader);
     const eraLabel = getEraLabel(era);
+    const categoryMeta = getCategoryMeta(leader.category);
     const yearsText = leader.death_year
         ? `${leader.birth_year} – ${leader.death_year}`
         : `${leader.birth_year} – настоящее время`;
@@ -185,6 +230,7 @@ function createLeaderCard(leader, idx) {
             </div>
             <div class="significance-dots">${sigDots}</div>
             <span class="era-badge era-${era}">${eraLabel}</span>
+            ${leader.category ? `<span class="category-badge category-${leader.category}" title="Сфера: ${categoryMeta.label}"><span class="category-badge-icon">${categoryMeta.icon}</span>${categoryMeta.label}</span>` : ''}
             <h2 class="leader-name">${leader.name_ru}</h2>
             <p class="leader-years">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.7;vertical-align:-2px">
@@ -872,24 +918,37 @@ function setupEventListeners() {
         });
     });
 
-    // View toggle
-    if (gridViewBtn) {
-        gridViewBtn.addEventListener('click', () => {
-            currentView = 'grid';
-            gridViewBtn.classList.add('active');
-            timelineViewBtn.classList.remove('active');
+    // Category filter buttons
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = btn.dataset.category;
             renderLeaders(currentSearchResults());
         });
-    }
+    });
 
-    if (timelineViewBtn) {
-        timelineViewBtn.addEventListener('click', () => {
-            currentView = 'timeline';
-            timelineViewBtn.classList.add('active');
-            gridViewBtn.classList.remove('active');
-            renderLeaders(currentSearchResults());
+    // View toggle
+    const viewButtons = [
+        { btn: gridViewBtn,     mode: 'grid' },
+        { btn: timelineViewBtn, mode: 'timeline' },
+        { btn: eventsViewBtn,   mode: 'events' },
+        { btn: graphViewBtn,    mode: 'graph' },
+    ];
+    function setActiveButton(mode) {
+        viewButtons.forEach(({ btn, mode: m }) => {
+            if (!btn) return;
+            btn.classList.toggle('active', m === mode);
         });
     }
+    viewButtons.forEach(({ btn, mode }) => {
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            currentView = mode;
+            setActiveButton(mode);
+            renderLeaders(currentSearchResults());
+        });
+    });
 }
 
 function closeVideo() {
@@ -982,9 +1041,13 @@ function handlePortraitError(img, fallbackText) {
 
 function showLoading(show) {
     loading.style.display = show ? 'block' : 'none';
-    leadersGrid.style.display = show ? 'none' : (currentView === 'grid' ? 'grid' : 'none');
-    if (!show && currentView === 'timeline') {
-        timelineView.style.display = 'block';
+    if (show) {
+        if (leadersGrid) leadersGrid.style.display = 'none';
+        if (timelineView) timelineView.style.display = 'none';
+        if (eventsView) eventsView.style.display = 'none';
+        if (graphView) graphView.style.display = 'none';
+    } else {
+        setActiveView(currentView);
     }
 }
 
@@ -994,3 +1057,4 @@ window.playVideo         = playVideo;
 window.resetSearch       = resetSearch;
 window.handlePortraitError = handlePortraitError;
 window.openChat          = openChat;
+window.showToast         = showToast;

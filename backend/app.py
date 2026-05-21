@@ -8,6 +8,8 @@ from flask_cors import CORS
 from database import Database
 from ai_service import AIService
 from chat_service import ChatService, OllamaUnavailableError
+from timeline_data import get_timeline
+from connections_data import get_connections
 
 app = Flask(__name__,
             template_folder='../frontend/templates',
@@ -99,6 +101,65 @@ def chat_with_leader(leader_id):
             'id': leader['id'],
             'name_ru': leader['name_ru'],
         },
+    })
+
+
+@app.route('/api/timeline')
+def get_timeline_events():
+    """Return chronology of significant events 1917-1991."""
+    return jsonify({'events': get_timeline()})
+
+
+@app.route('/api/connections')
+def get_connections_graph():
+    """Return the connections graph between historical figures."""
+    payload = get_connections()
+    leaders = {l['id']: l for l in db.get_all_leaders()}
+    nodes = [
+        {
+            'id': lid,
+            'name_ru': leaders[lid]['name_ru'],
+            'category': leaders[lid].get('category'),
+            'portrait_url': leaders[lid].get('portrait_url'),
+        }
+        for lid in payload['node_ids']
+        if lid in leaders
+    ]
+    return jsonify({
+        'nodes': nodes,
+        'edges': payload['edges'],
+        'link_types': payload['link_types'],
+    })
+
+
+@app.route('/api/quiz')
+def get_quiz_question():
+    """Build a single 'who is in the portrait' question from the leader roster."""
+    import random
+    leaders = [l for l in db.get_all_leaders() if l.get('portrait_url')]
+    if len(leaders) < 4:
+        return jsonify({'error': 'Недостаточно личностей для квиза'}), 503
+
+    answer = random.choice(leaders)
+    distractor_pool = [l for l in leaders if l['id'] != answer['id']]
+    distractors = random.sample(distractor_pool, 3)
+    options = [
+        {'id': l['id'], 'name_ru': l['name_ru']}
+        for l in distractors + [answer]
+    ]
+    random.shuffle(options)
+
+    return jsonify({
+        'question': {
+            'leader_id': answer['id'],
+            'portrait_url': answer['portrait_url'],
+            'birth_year': answer.get('birth_year'),
+            'death_year': answer.get('death_year'),
+            'category': answer.get('category'),
+            'achievements_hint': (answer.get('short_description') or '')[:160],
+        },
+        'options': options,
+        'answer_id': answer['id'],
     })
 
 
