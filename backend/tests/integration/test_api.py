@@ -16,7 +16,7 @@ def test_get_leaders(client, sample_leader):
 
 
 def test_get_leaders_exposes_archive_media_fields(client, seeded_db):
-    """Leaders API should expose portrait and video metadata for archive cards"""
+    """Leaders API should expose portrait, video and category metadata for archive cards"""
     response = client.get('/api/leaders/')
 
     assert response.status_code == 200
@@ -26,23 +26,53 @@ def test_get_leaders_exposes_archive_media_fields(client, seeded_db):
     leader = data['data'][0]
     assert 'portrait_url' in leader
     assert 'video_id' in leader
+    assert 'category' in leader
+
+
+def test_get_leaders_returns_expanded_roster_with_categories(client, seeded_db):
+    """Seeded roster should expose the full set of 24 figures grouped by domain."""
+    response = client.get('/api/leaders/')
+
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['success'] is True
+
+    leaders = data['data']
+    assert len(leaders) >= 24
+
+    categories = {leader.get('category') for leader in leaders}
+    expected_categories = {'politics', 'military', 'space', 'science', 'culture', 'sports', 'labor'}
+    missing = expected_categories - categories
+    assert not missing, f'Missing categories: {missing}'
 
 
 def test_get_leaders_preserves_expected_portrait_assignments(client, seeded_db):
     """Specific historical figures should keep their intended portraits."""
     expected_portrait_fragments = {
-        'Владимир Ильич Ленин': 'Vladimir_Lenin',
-        'Иосиф Виссарионович Сталин': 'Stalin',
-        'Никита Сергеевич Хрущёв': 'Nikita_Khrushchev',
-        'Леонид Ильич Брежнев': 'Leonid_Brezhnev',
-        'Юрий Владимирович Андропов': 'Yuri_Andropov',
-        'Константин Устинович Черненко': 'Konstantin_Chernenko',
-        'Михаил Сергеевич Горбачёв': 'Gorbachev',
-        'Георгий Константинович Жуков': 'Zhukov',
-        'Юрий Алексеевич Гагарин': 'Yuri_Gagarin',
-        'Сергей Павлович Королёв': 'Korolyov',
-        'Валентина Владимировна Терешкова': 'Tereshkova',
-        'Алексей Григорьевич Стаханов': 'Stakhanov',
+        'Владимир Ильич Ленин': '01_lenin',
+        'Иосиф Виссарионович Сталин': '02_stalin',
+        'Никита Сергеевич Хрущёв': '03_khrushchev',
+        'Леонид Ильич Брежнев': '04_brezhnev',
+        'Юрий Владимирович Андропов': '05_andropov',
+        'Константин Устинович Черненко': '06_chernenko',
+        'Михаил Сергеевич Горбачёв': '07_gorbachev',
+        'Георгий Константинович Жуков': '08_zhukov',
+        'Юрий Алексеевич Гагарин': '09_gagarin',
+        'Сергей Павлович Королёв': '10_korolev',
+        'Валентина Владимировна Терешкова': '11_tereshkova',
+        'Алексей Григорьевич Стаханов': '12_stakhanov',
+        'Андрей Дмитриевич Сахаров': '13_sakharov',
+        'Игорь Васильевич Курчатов': '14_kurchatov',
+        'Дмитрий Дмитриевич Шостакович': '15_shostakovich',
+        'Сергей Михайлович Эйзенштейн': '16_eisenstein',
+        'Михаил Александрович Шолохов': '17_sholokhov',
+        'Владимир Семёнович Высоцкий': '18_vysotsky',
+        'Лев Иванович Яшин': '19_yashin',
+        'Майя Михайловна Плисецкая': '20_plisetskaya',
+        'Михаил Тимофеевич Калашников': '21_kalashnikov',
+        'Александр Исаевич Солженицын': '22_solzhenitsyn',
+        'Алексей Архипович Леонов': '23_leonov',
+        'Константин Константинович Рокоссовский': '24_rokossovsky',
     }
 
     response = client.get('/api/leaders/')

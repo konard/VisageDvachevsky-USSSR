@@ -29,6 +29,7 @@ class Leader(BaseModel, TimestampMixin):
     years_in_power_end = db.Column(db.Integer)
     legacy = db.Column(db.Text)
     historical_significance = db.Column(db.Integer, default=5)  # 1-10 scale
+    category = db.Column(db.String(40), index=True)
     is_published = db.Column(db.Boolean, default=True)
     view_count = db.Column(db.Integer, default=0)
 
@@ -62,6 +63,7 @@ class Leader(BaseModel, TimestampMixin):
             } if self.years_in_power_start else None,
             'legacy': self.legacy,
             'historical_significance': self.historical_significance,
+            'category': self.category,
             'video_id': self.video_id,
             'portrait_url': self.portrait_url,
             'view_count': self.view_count,

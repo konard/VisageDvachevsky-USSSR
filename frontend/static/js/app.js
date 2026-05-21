@@ -7,7 +7,22 @@
 let allLeaders = [];
 let currentView = 'grid';   // 'grid' | 'timeline'
 let currentFilter = 'all';  // 'all' | 'early' | 'mid' | 'late'
+let currentCategory = 'all'; // 'all' | 'politics' | 'military' | 'space' | 'science' | 'culture' | 'sports' | 'labor'
 const VIDEO_PLACEHOLDER_TEXT = 'Архивный ролик готовится';
+
+const CATEGORY_META = {
+    politics: { label: 'Политика',  icon: '☭' },
+    military: { label: 'Армия',     icon: '★' },
+    space:    { label: 'Космос',    icon: '🚀' },
+    science:  { label: 'Наука',     icon: '⚛' },
+    culture:  { label: 'Культура',  icon: '🎭' },
+    sports:   { label: 'Спорт',     icon: '⚽' },
+    labor:    { label: 'Труд',      icon: '⚒' },
+};
+
+function getCategoryMeta(category) {
+    return CATEGORY_META[category] || { label: 'Эпоха', icon: '✦' };
+}
 
 // ===== DOM REFS =====
 const leadersGrid      = document.getElementById('leadersGrid');
@@ -93,7 +108,8 @@ function getEraLabel(era) {
 
 // ===== RENDER LEADERS =====
 function renderLeaders(leaders) {
-    const filtered = filterLeaders(leaders, currentFilter);
+    let filtered = filterLeaders(leaders, currentFilter);
+    filtered = filterLeadersByCategory(filtered, currentCategory);
 
     if (currentView === 'timeline') {
         renderTimeline(filtered);
@@ -105,6 +121,11 @@ function renderLeaders(leaders) {
 function filterLeaders(leaders, filter) {
     if (filter === 'all') return leaders;
     return leaders.filter(l => getEra(l) === filter);
+}
+
+function filterLeadersByCategory(leaders, category) {
+    if (!category || category === 'all') return leaders;
+    return leaders.filter(l => l.category === category);
 }
 
 function renderGrid(leaders) {
@@ -154,6 +175,7 @@ function createLeaderCard(leader, idx) {
 
     const era = getEra(leader);
     const eraLabel = getEraLabel(era);
+    const categoryMeta = getCategoryMeta(leader.category);
     const yearsText = leader.death_year
         ? `${leader.birth_year} – ${leader.death_year}`
         : `${leader.birth_year} – настоящее время`;
@@ -185,6 +207,7 @@ function createLeaderCard(leader, idx) {
             </div>
             <div class="significance-dots">${sigDots}</div>
             <span class="era-badge era-${era}">${eraLabel}</span>
+            ${leader.category ? `<span class="category-badge category-${leader.category}" title="Сфера: ${categoryMeta.label}"><span class="category-badge-icon">${categoryMeta.icon}</span>${categoryMeta.label}</span>` : ''}
             <h2 class="leader-name">${leader.name_ru}</h2>
             <p class="leader-years">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.7;vertical-align:-2px">
@@ -868,6 +891,16 @@ function setupEventListeners() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentFilter = btn.dataset.filter;
+            renderLeaders(currentSearchResults());
+        });
+    });
+
+    // Category filter buttons
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = btn.dataset.category;
             renderLeaders(currentSearchResults());
         });
     });
