@@ -1,6 +1,7 @@
 """Download and resize new portraits from Wikimedia Commons."""
 import os
 import sys
+import time
 from urllib.parse import unquote
 import urllib.request
 from io import BytesIO
@@ -21,6 +22,18 @@ PORTRAITS = [
     (22, "solzhenitsyn", "https://upload.wikimedia.org/wikipedia/commons/8/8d/Aleksandr_Solzhenitsyn_1974crop.jpg"),
     (23, "leonov",       "https://upload.wikimedia.org/wikipedia/commons/f/f8/Alexei_Leonov.jpg"),
     (24, "rokossovsky",  "https://upload.wikimedia.org/wikipedia/commons/8/8e/Marshal_of_Poland_Konstanty_Rokossowski_portrait.jpg"),
+    (25, "tupolev",      "https://upload.wikimedia.org/wikipedia/commons/7/7a/%D0%90.%D0%9D._%D0%A2%D1%83%D0%BF%D0%BE%D0%BB%D0%B5%D0%B2_1944.jpg"),
+    (26, "kapitsa",      "https://upload.wikimedia.org/wikipedia/commons/4/44/Pyotr_Kapitsa_1930s.jpg"),
+    (27, "landau",       "https://upload.wikimedia.org/wikipedia/commons/0/0b/Landau.jpg"),
+    (28, "ulanova",      "https://upload.wikimedia.org/wikipedia/commons/5/5c/Galina_Ulanova_1968.jpg"),
+    (29, "okudzhava",    "https://upload.wikimedia.org/wikipedia/commons/3/3f/Bundesarchiv_Bild_183-R1202-0019%2C_Berlin%2C_Palast_der_Republik%2C_Bulat_Okudshawa_cropped.jpg"),
+    (30, "kalinin",      "https://upload.wikimedia.org/wikipedia/commons/b/bb/%D0%9C%D0%B8%D1%85%D0%B0%D0%B8%D0%BB_%D0%9A%D0%B0%D0%BB%D0%B8%D0%BD%D0%B8%D0%BD_%281940%29.jpg"),
+    (31, "molotov",      "https://upload.wikimedia.org/wikipedia/commons/3/3f/V.M._Molotov_TASS_Portrait_Trim_Edit_Crop_%28cropped%29.jpg"),
+    (32, "budyonny",     "https://upload.wikimedia.org/wikipedia/commons/5/51/%D0%9C%D0%B0%D1%80%D1%88%D0%B0%D0%BB_%D0%A1%D0%BE%D0%B2%D0%B5%D1%82%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_%D0%A1%D0%BE%D1%8E%D0%B7%D0%B0_%D0%A1%D0%B5%D0%BC%D1%91%D0%BD_%D0%9C%D0%B8%D1%85%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%B8%D1%87_%D0%91%D1%83%D0%B4%D1%91%D0%BD%D0%BD%D1%8B%D0%B9.jpg"),
+    (33, "chkalov",      "https://upload.wikimedia.org/wikipedia/commons/9/9a/%D0%92%D0%B0%D0%BB%D0%B5%D1%80%D0%B8%D0%B9_%D0%9F%D0%B0%D0%B2%D0%BB%D0%BE%D0%B2%D0%B8%D1%87_%D0%A7%D0%BA%D0%B0%D0%BB%D0%BE%D0%B2.jpg"),
+    (34, "papanin",      "https://upload.wikimedia.org/wikipedia/commons/a/a0/%D0%9F%D0%B0%D0%BF%D0%B0%D0%BD%D0%B8%D0%BD_%D0%98%D0%B2%D0%B0%D0%BD_%D0%94%D0%BC%D0%B8%D1%82%D1%80%D0%B8%D0%B5%D0%B2%D0%B8%D1%87_1.jpg"),
+    (35, "lysenko",      "https://upload.wikimedia.org/wikipedia/commons/e/ee/Trofim_Lysenko_portrait.jpg"),
+    (36, "akhmatova",    "https://upload.wikimedia.org/wikipedia/commons/3/37/%D0%90%D0%BD%D0%BD%D0%B0_%D0%90%D1%85%D0%BC%D0%B0%D1%82%D0%BE%D0%B2%D0%B0.png"),
 ]
 
 TARGET_DIR = os.path.abspath("frontend/static/portraits")
@@ -33,8 +46,12 @@ def fetch(url: str) -> bytes:
 
 def main() -> int:
     os.makedirs(TARGET_DIR, exist_ok=True)
+    # CLI filter: pass numeric IDs to download only a subset (e.g. "25 26 27").
+    wanted_ids = {int(arg) for arg in sys.argv[1:] if arg.isdigit()}
     failures = []
     for num, slug, url in PORTRAITS:
+        if wanted_ids and num not in wanted_ids:
+            continue
         dest = os.path.join(TARGET_DIR, f"{num:02d}_{slug}.jpg")
         print(f"-> {num:02d} {slug}: {url}")
         try:
@@ -42,6 +59,7 @@ def main() -> int:
         except Exception as exc:
             failures.append((num, slug, f"fetch failed: {exc}"))
             print(f"   ! fetch failed: {exc}")
+            time.sleep(2.0)
             continue
         try:
             img = Image.open(BytesIO(data))
@@ -58,6 +76,7 @@ def main() -> int:
         except Exception as exc:
             failures.append((num, slug, f"process failed: {exc}"))
             print(f"   ! process failed: {exc}")
+        time.sleep(2.0)
     if failures:
         print("\nFAILURES:")
         for num, slug, msg in failures:

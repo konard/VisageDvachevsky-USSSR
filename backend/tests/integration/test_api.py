@@ -30,7 +30,7 @@ def test_get_leaders_exposes_archive_media_fields(client, seeded_db):
 
 
 def test_get_leaders_returns_expanded_roster_with_categories(client, seeded_db):
-    """Seeded roster should expose the full set of 24 figures grouped by domain."""
+    """Seeded roster should expose the full set of 36 figures grouped by domain."""
     response = client.get('/api/leaders/')
 
     assert response.status_code == 200
@@ -38,7 +38,7 @@ def test_get_leaders_returns_expanded_roster_with_categories(client, seeded_db):
     assert data['success'] is True
 
     leaders = data['data']
-    assert len(leaders) >= 24
+    assert len(leaders) >= 36
 
     categories = {leader.get('category') for leader in leaders}
     expected_categories = {'politics', 'military', 'space', 'science', 'culture', 'sports', 'labor'}
@@ -73,6 +73,18 @@ def test_get_leaders_preserves_expected_portrait_assignments(client, seeded_db):
         'Александр Исаевич Солженицын': '22_solzhenitsyn',
         'Алексей Архипович Леонов': '23_leonov',
         'Константин Константинович Рокоссовский': '24_rokossovsky',
+        'Андрей Николаевич Туполев': '25_tupolev',
+        'Пётр Леонидович Капица': '26_kapitsa',
+        'Лев Давидович Ландау': '27_landau',
+        'Галина Сергеевна Уланова': '28_ulanova',
+        'Булат Шалвович Окуджава': '29_okudzhava',
+        'Михаил Иванович Калинин': '30_kalinin',
+        'Вячеслав Михайлович Молотов': '31_molotov',
+        'Семён Михайлович Будённый': '32_budyonny',
+        'Валерий Павлович Чкалов': '33_chkalov',
+        'Иван Дмитриевич Папанин': '34_papanin',
+        'Трофим Денисович Лысенко': '35_lysenko',
+        'Анна Андреевна Ахматова': '36_akhmatova',
     }
 
     response = client.get('/api/leaders/')
