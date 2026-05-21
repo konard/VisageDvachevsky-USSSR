@@ -111,7 +111,11 @@ class Database:
         conn.close()
 
     def _update_extended_fields(self, cursor):
-        """Update existing rows with extended data fields"""
+        """Update existing rows with extended data fields.
+
+        Portrait URLs are forced to the bundled local paths so that
+        stale remote URLs from earlier seedings get replaced.
+        """
         leaders_data = self._get_leaders_data()
         for leader in leaders_data:
             cursor.execute('''
@@ -122,7 +126,7 @@ class Database:
                     years_in_power_start = COALESCE(years_in_power_start, ?),
                     years_in_power_end = COALESCE(years_in_power_end, ?),
                     historical_significance = COALESCE(historical_significance, ?),
-                    portrait_url = COALESCE(portrait_url, ?)
+                    portrait_url = ?
                 WHERE id = ?
             ''', (
                 leader.get('biography'),
@@ -168,7 +172,7 @@ class Database:
                 'years_in_power_end': 1924,
                 'historical_significance': 10,
                 'video_id': 1,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/7/79/Vladimir_Lenin.jpg'
+                'portrait_url': '/static/portraits/01_lenin.jpg'
             },
             {
                 'id': 2,
@@ -204,7 +208,7 @@ class Database:
                 'years_in_power_end': 1953,
                 'historical_significance': 10,
                 'video_id': 2,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/3/38/Stalin_Full_Image.jpg'
+                'portrait_url': '/static/portraits/02_stalin.jpg'
             },
             {
                 'id': 3,
@@ -242,7 +246,7 @@ class Database:
                 'years_in_power_end': 1964,
                 'historical_significance': 8,
                 'video_id': 3,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/7/70/Nikita_Khrushchev_1963.jpg'
+                'portrait_url': '/static/portraits/03_khrushchev.jpg'
             },
             {
                 'id': 4,
@@ -279,7 +283,7 @@ class Database:
                 'years_in_power_end': 1982,
                 'historical_significance': 7,
                 'video_id': 4,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/6/68/RIAN_archive_850809_Leonid_Brezhnev.jpg'
+                'portrait_url': '/static/portraits/04_brezhnev.jpg'
             },
             {
                 'id': 5,
@@ -315,7 +319,7 @@ class Database:
                 'years_in_power_end': 1984,
                 'historical_significance': 6,
                 'video_id': 5,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/2/25/Yuri_Andropov_1974.jpg'
+                'portrait_url': '/static/portraits/05_andropov.jpg'
             },
             {
                 'id': 6,
@@ -352,7 +356,7 @@ class Database:
                 'years_in_power_end': 1985,
                 'historical_significance': 4,
                 'video_id': 6,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/7/7a/Konstantin_Chernenko_1985.jpg'
+                'portrait_url': '/static/portraits/06_chernenko.jpg'
             },
             {
                 'id': 7,
@@ -391,7 +395,7 @@ class Database:
                 'years_in_power_end': 1991,
                 'historical_significance': 9,
                 'video_id': 7,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/5/59/Gorbachev_1987.jpg'
+                'portrait_url': '/static/portraits/07_gorbachev.jpg'
             },
             {
                 'id': 8,
@@ -423,7 +427,7 @@ class Database:
                 'years_in_power_end': 1945,
                 'historical_significance': 9,
                 'video_id': 8,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Zhukov_LIFE.jpg'
+                'portrait_url': '/static/portraits/08_zhukov.jpg'
             },
             {
                 'id': 9,
@@ -452,7 +456,7 @@ class Database:
                 'years_in_power_end': 1961,
                 'historical_significance': 10,
                 'video_id': 9,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Yuri_Gagarin_%281961%29.jpg'
+                'portrait_url': '/static/portraits/09_gagarin.jpg'
             },
             {
                 'id': 10,
@@ -482,7 +486,7 @@ class Database:
                 'years_in_power_end': 1966,
                 'historical_significance': 9,
                 'video_id': 10,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Sergey_Korolyov.jpg'
+                'portrait_url': '/static/portraits/10_korolev.jpg'
             },
             {
                 'id': 11,
@@ -511,7 +515,7 @@ class Database:
                 'years_in_power_end': 1963,
                 'historical_significance': 8,
                 'video_id': 11,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/0/00/RIAN_archive_612748_Valentina_Tereshkova.jpg'
+                'portrait_url': '/static/portraits/11_tereshkova.jpg'
             },
             {
                 'id': 12,
@@ -539,7 +543,7 @@ class Database:
                 'years_in_power_end': 1935,
                 'historical_significance': 7,
                 'video_id': 12,
-                'portrait_url': 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Alexey_Stakhanov.jpg'
+                'portrait_url': '/static/portraits/12_stakhanov.jpg'
             }
         ]
 
