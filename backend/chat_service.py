@@ -42,8 +42,8 @@ class ChatService:
     ):
         self.base_url = (base_url or os.environ.get("OLLAMA_BASE_URL", DEFAULT_OLLAMA_URL)).rstrip("/")
         self.model = model or os.environ.get("OLLAMA_MODEL", DEFAULT_MODEL)
-        self.timeout = int(timeout or os.environ.get("OLLAMA_TIMEOUT", DEFAULT_TIMEOUT))
-        self.max_history = int(max_history or os.environ.get("CHAT_MAX_HISTORY", DEFAULT_MAX_HISTORY))
+        self.timeout = int(timeout or os.environ.get("OLLAMA_TIMEOUT") or DEFAULT_TIMEOUT)
+        self.max_history = int(max_history or os.environ.get("CHAT_MAX_HISTORY") or DEFAULT_MAX_HISTORY)
         self.session = session or requests.Session()
 
     # ----- public API -----------------------------------------------------

@@ -14,15 +14,16 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 try:
-    from app_enhanced import create_app
+    from app_enhanced import create_app, initialize_leaders_data
     from models.base import db as _db
     from models import Leader, User, Role
     from services.auth_service import AuthService
 except Exception:  # pragma: no cover - optional stack
-    create_app = None
-    _db = None
-    Leader = User = Role = None
-    AuthService = None
+    create_app = None  # type: ignore[assignment]
+    initialize_leaders_data = None  # type: ignore[assignment]
+    _db = None  # type: ignore[assignment]
+    Leader = User = Role = None  # type: ignore[assignment,misc]
+    AuthService = None  # type: ignore[assignment,misc]
 
 
 @pytest.fixture(scope='session')
@@ -48,6 +49,15 @@ def db(app):
         yield _db
         _db.session.remove()
         _db.drop_all()
+
+
+@pytest.fixture(scope='function')
+def seeded_db(db, app):
+    """Database fixture pre-populated with the canonical set of leaders."""
+    if initialize_leaders_data is None:
+        pytest.skip("enhanced application stack is unavailable")
+    initialize_leaders_data(app)
+    return db
 
 
 @pytest.fixture
