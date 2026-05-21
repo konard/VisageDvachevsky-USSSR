@@ -94,3 +94,12 @@ yarn-error.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Playwright MCP scratch
+.playwright-mcp/
+
+# Scratch screenshots from local testing (committed copies live in docs/screenshots/)
+/homepage.png
+/chat-modal.png
+/chat-modal-full.png
+/chat-after-send.png

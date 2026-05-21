@@ -20,8 +20,10 @@ const searchBtn        = document.getElementById('searchBtn');
 const clearSearchBtn   = document.getElementById('clearSearch');
 const leaderModal      = document.getElementById('leaderModal');
 const videoModal       = document.getElementById('videoModal');
+const chatModal        = document.getElementById('chatModal');
 const closeModal       = document.getElementById('closeModal');
 const closeVideoModal  = document.getElementById('closeVideoModal');
+const closeChatModal   = document.getElementById('closeChatModal');
 const modalBody        = document.getElementById('modalBody');
 const leaderVideo      = document.getElementById('leaderVideo');
 const videoTitle       = document.getElementById('videoTitle');
@@ -29,6 +31,24 @@ const toast            = document.getElementById('toast');
 const gridViewBtn      = document.getElementById('gridViewBtn');
 const timelineViewBtn  = document.getElementById('timelineViewBtn');
 const leaderCountEl    = document.getElementById('leaderCount');
+
+// Chat refs
+const chatLog          = document.getElementById('chatLog');
+const chatInput        = document.getElementById('chatInput');
+const chatForm         = document.getElementById('chatForm');
+const chatSendBtn      = document.getElementById('chatSendBtn');
+const chatStatusEl     = document.getElementById('chatStatus');
+const chatModelLabel   = document.getElementById('chatModelLabel');
+const chatLeaderName   = document.getElementById('chatLeaderName');
+const chatLeaderRole   = document.getElementById('chatLeaderRole');
+const chatLeaderPortraitFrame = document.getElementById('chatLeaderPortraitFrame');
+const chatWarning      = document.getElementById('chatWarning');
+
+// Chat state
+const chatHistoryByLeader = new Map(); // leaderId -> [{role, content}]
+let currentChatLeader = null;
+let chatHealthState = { available: null, model: null };
+let chatRequestInflight = false;
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
@@ -213,6 +233,12 @@ function createLeaderCard(leader, idx) {
                 </svg>
                 Хроника
             </button>
+            <button class="btn btn-chat" onclick="openChat(${leader.id})" title="Поговорить с этой фигурой через локальную LLM">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Диалог
+            </button>
         </div>
         <div class="leader-video-strip">
             <span class="video-strip-label">Видеоархив</span>
@@ -390,6 +416,23 @@ async function showLeaderDetails(leaderId) {
                         </button>
                     </div>
                 </div>
+
+                <!-- Dialogue Section -->
+                <div class="info-section">
+                    <h3 class="section-title">
+                        <span class="section-icon">💬</span>
+                        Диалог с фигурой (Ollama)
+                    </h3>
+                    <p style="margin:0 0 14px;color:#444;font-size:0.95rem;">
+                        Локальная нейросеть отыгрывает роль ${escapeHtml(leader.name_ru)}. Беседа строго о его эпохе, биографии и деятельности.
+                    </p>
+                    <button class="btn btn-chat btn-video" onclick="openChat(${leader.id})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Открыть диалог
+                    </button>
+                </div>
             </div>
         `;
 
@@ -478,6 +521,294 @@ function resetSearch() {
     noResults.style.display = 'none';
 }
 
+// ===== CHAT WITH LEADER (Ollama) =====
+async function openChat(leaderId) {
+    const leader = allLeaders.find(l => l.id === leaderId);
+    if (!leader) {
+        showToast('Лидер не найден', 'error');
+        return;
+    }
+
+    currentChatLeader = leader;
+
+    // Close other modals
+    leaderModal.classList.remove('active');
+    videoModal.classList.remove('active');
+
+    // Populate header
+    chatLeaderName.textContent = leader.name_ru;
+    chatLeaderRole.textContent = leader.position || '';
+    renderChatPortrait(leader);
+
+    // Render history (or greeting)
+    renderChatHistory(leaderId, leader);
+
+    // Show modal
+    chatModal.classList.add('active');
+    chatInput.value = '';
+    chatInput.focus();
+
+    // Probe Ollama health
+    await refreshChatHealth();
+}
+
+function renderChatHistory(leaderId, leader) {
+    const history = chatHistoryByLeader.get(leaderId) || [];
+    chatLog.innerHTML = '';
+
+    if (history.length === 0) {
+        appendChatBubble({
+            role: 'system',
+            content: `Беседа с фигурой «${leader.name_ru}». Задавайте вопросы только о его эпохе, биографии и деятельности.`,
+        });
+    } else {
+        history.forEach(msg => appendChatBubble(msg));
+    }
+    scrollChatToBottom();
+}
+
+function appendChatBubble({ role, content, error = false }) {
+    const wrap = document.createElement('div');
+    let cls = 'chat-msg';
+    if (role === 'user') cls += ' chat-msg-user';
+    else if (role === 'assistant') cls += ' chat-msg-assistant';
+    else if (role === 'system') cls += ' chat-msg-system';
+    if (error) cls += ' chat-msg-error';
+    wrap.className = cls;
+
+    const roleLabel = document.createElement('div');
+    roleLabel.className = 'chat-msg-role';
+    if (role === 'user') roleLabel.textContent = 'Вы';
+    else if (role === 'assistant') roleLabel.textContent = currentChatLeader ? currentChatLeader.name_ru : 'Лидер';
+    else roleLabel.textContent = 'Система';
+
+    const body = document.createElement('div');
+    body.className = 'chat-msg-body';
+    body.textContent = content;
+
+    wrap.appendChild(roleLabel);
+    wrap.appendChild(body);
+    chatLog.appendChild(wrap);
+    return wrap;
+}
+
+function appendTypingIndicator() {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-msg chat-msg-assistant';
+    wrap.id = 'chatTypingIndicator';
+    wrap.innerHTML = `
+        <div class="chat-msg-role">${currentChatLeader ? escapeHtml(currentChatLeader.name_ru) : 'Лидер'} печатает…</div>
+        <div class="chat-typing"><span></span><span></span><span></span></div>
+    `;
+    chatLog.appendChild(wrap);
+    scrollChatToBottom();
+    return wrap;
+}
+
+function removeTypingIndicator() {
+    const el = document.getElementById('chatTypingIndicator');
+    if (el) el.remove();
+}
+
+function scrollChatToBottom() {
+    chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+async function sendChatMessage(event) {
+    if (event) event.preventDefault();
+    if (!currentChatLeader) return;
+    if (chatRequestInflight) return;
+
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    const leaderId = currentChatLeader.id;
+    const history = chatHistoryByLeader.get(leaderId) || [];
+
+    // Optimistically render the user message
+    appendChatBubble({ role: 'user', content: message });
+    chatInput.value = '';
+    chatInput.style.height = '';
+    scrollChatToBottom();
+
+    chatRequestInflight = true;
+    chatSendBtn.disabled = true;
+    chatInput.disabled = true;
+    appendTypingIndicator();
+
+    try {
+        const resp = await fetch(`/api/leaders/${leaderId}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message,
+                history,
+            }),
+        });
+
+        removeTypingIndicator();
+
+        if (!resp.ok) {
+            let payload = null;
+            try { payload = await resp.json(); } catch (_) { /* ignore */ }
+            const msg = (payload && payload.error)
+                ? payload.error
+                : `Ошибка сервера (${resp.status})`;
+
+            appendChatBubble({
+                role: 'assistant',
+                content: msg,
+                error: true,
+            });
+
+            if (resp.status === 503) {
+                setChatStatus('offline', payload?.error || 'Ollama недоступен');
+            }
+            return;
+        }
+
+        const data = await resp.json();
+        if (Array.isArray(data.history)) {
+            chatHistoryByLeader.set(leaderId, data.history);
+        } else {
+            const updated = history.concat([
+                { role: 'user', content: message },
+                { role: 'assistant', content: data.reply || '' },
+            ]);
+            chatHistoryByLeader.set(leaderId, updated);
+        }
+
+        appendChatBubble({
+            role: 'assistant',
+            content: data.reply || '(пустой ответ)',
+        });
+
+        if (data.off_topic) {
+            showChatWarning('Запрос вне темы — фигура отвечает только о своей эпохе.');
+        } else {
+            hideChatWarning();
+        }
+
+        if (data.model) {
+            chatHealthState.model = data.model;
+            updateChatModelLabel();
+        }
+        setChatStatus('online');
+    } catch (err) {
+        removeTypingIndicator();
+        appendChatBubble({
+            role: 'assistant',
+            content: 'Не удалось связаться с сервером. Проверьте подключение и Ollama.',
+            error: true,
+        });
+        setChatStatus('offline', 'Ошибка сети');
+    } finally {
+        scrollChatToBottom();
+        chatRequestInflight = false;
+        chatSendBtn.disabled = false;
+        chatInput.disabled = false;
+        chatInput.focus();
+    }
+}
+
+async function refreshChatHealth() {
+    setChatStatus('checking');
+    try {
+        const resp = await fetch('/api/chat/health');
+        const data = await resp.json();
+        chatHealthState = {
+            available: !!data.available,
+            model: data.model || null,
+            model_present: !!data.model_present,
+            models: data.models || [],
+        };
+        updateChatModelLabel();
+
+        if (!data.available) {
+            setChatStatus('offline', data.error || 'Ollama не отвечает');
+            showChatWarning(
+                'Локальная модель Ollama недоступна. Установите Ollama и запустите её: '
+                + '<code>ollama serve</code>, затем <code>ollama pull '
+                + escapeHtml(data.model || 'llama3.1:8b') + '</code>.'
+            );
+        } else if (data.model && data.model_present === false) {
+            setChatStatus('offline', `модель ${data.model} не загружена`);
+            showChatWarning(
+                `Модель <code>${escapeHtml(data.model)}</code> не найдена. Выполните: `
+                + `<code>ollama pull ${escapeHtml(data.model)}</code>.`
+            );
+        } else {
+            setChatStatus('online');
+            hideChatWarning();
+        }
+    } catch (err) {
+        chatHealthState = { available: false, model: null };
+        setChatStatus('offline', 'health endpoint недоступен');
+        showChatWarning('Сервер недоступен. Запустите backend и Ollama.');
+    }
+}
+
+function setChatStatus(state, detail = '') {
+    chatStatusEl.classList.remove('online', 'offline', 'checking');
+    chatStatusEl.classList.add(state);
+    let label = state;
+    if (state === 'online') label = 'онлайн';
+    else if (state === 'offline') label = 'офлайн';
+    else if (state === 'checking') label = 'проверка…';
+    chatStatusEl.textContent = detail ? `${label} — ${detail}` : label;
+}
+
+function updateChatModelLabel() {
+    if (chatHealthState.model) {
+        chatModelLabel.textContent = `модель: ${chatHealthState.model}`;
+    } else {
+        chatModelLabel.textContent = '';
+    }
+}
+
+function showChatWarning(html) {
+    chatWarning.innerHTML = html;
+    chatWarning.style.display = '';
+}
+
+function hideChatWarning() {
+    chatWarning.style.display = 'none';
+    chatWarning.innerHTML = '';
+}
+
+function closeChat() {
+    chatModal.classList.remove('active');
+    removeTypingIndicator();
+}
+
+function renderChatPortrait(leader) {
+    if (!chatLeaderPortraitFrame) return;
+    chatLeaderPortraitFrame.innerHTML = '';
+    const initial = (leader.name_ru || '?').charAt(0);
+
+    if (leader.portrait_url) {
+        const img = document.createElement('img');
+        img.className = 'chat-header-portrait';
+        img.src = leader.portrait_url;
+        img.alt = leader.name_ru;
+        img.referrerPolicy = 'no-referrer';
+        img.loading = 'lazy';
+        img.onerror = () => replaceChatPortraitWithPlaceholder(initial);
+        chatLeaderPortraitFrame.appendChild(img);
+    } else {
+        replaceChatPortraitWithPlaceholder(initial);
+    }
+}
+
+function replaceChatPortraitWithPlaceholder(initial) {
+    if (!chatLeaderPortraitFrame) return;
+    chatLeaderPortraitFrame.innerHTML = '';
+    const ph = document.createElement('div');
+    ph.className = 'chat-header-portrait chat-header-portrait-placeholder';
+    ph.textContent = initial;
+    chatLeaderPortraitFrame.appendChild(ph);
+}
+
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
     // Search
@@ -497,18 +828,39 @@ function setupEventListeners() {
     // Close modals
     closeModal.addEventListener('click', () => leaderModal.classList.remove('active'));
     closeVideoModal.addEventListener('click', closeVideo);
+    if (closeChatModal) closeChatModal.addEventListener('click', closeChat);
     leaderModal.addEventListener('click', e => {
         if (e.target === leaderModal) leaderModal.classList.remove('active');
     });
     videoModal.addEventListener('click', e => {
         if (e.target === videoModal) closeVideo();
     });
+    if (chatModal) {
+        chatModal.addEventListener('click', e => {
+            if (e.target === chatModal) closeChat();
+        });
+    }
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             leaderModal.classList.remove('active');
             closeVideo();
+            closeChat();
         }
     });
+
+    // Chat form
+    if (chatForm) {
+        chatForm.addEventListener('submit', sendChatMessage);
+    }
+    if (chatInput) {
+        chatInput.addEventListener('keydown', e => {
+            // Cmd/Ctrl+Enter or plain Enter (without Shift) sends
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+    }
 
     // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -641,3 +993,4 @@ window.showLeaderDetails = showLeaderDetails;
 window.playVideo         = playVideo;
 window.resetSearch       = resetSearch;
 window.handlePortraitError = handlePortraitError;
+window.openChat          = openChat;

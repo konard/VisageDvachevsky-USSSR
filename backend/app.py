@@ -7,15 +7,17 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
 from database import Database
 from ai_service import AIService
+from chat_service import ChatService, OllamaUnavailableError
 
 app = Flask(__name__,
             template_folder='../frontend/templates',
             static_folder='../frontend/static')
 CORS(app)
 
-# Initialize database and AI service
+# Initialize database and services
 db = Database()
 ai_service = AIService()
+chat_service = ChatService()
 
 @app.route('/')
 def index():
@@ -55,6 +57,50 @@ def search():
 
     results = ai_service.semantic_search(query, db.get_all_leaders())
     return jsonify({'results': results})
+
+@app.route('/api/chat/health')
+def chat_health():
+    """Report whether the configured Ollama backend is reachable."""
+    return jsonify(chat_service.health())
+
+
+@app.route('/api/leaders/<int:leader_id>/chat', methods=['POST'])
+def chat_with_leader(leader_id):
+    """Have a constrained dialogue with a historical figure via Ollama."""
+    leader = db.get_leader_by_id(leader_id)
+    if not leader:
+        return jsonify({'error': 'Leader not found'}), 404
+
+    payload = request.get_json(silent=True) or {}
+    message = payload.get('message', '')
+    history = payload.get('history', [])
+
+    if not isinstance(message, str) or not message.strip():
+        return jsonify({'error': 'Поле "message" обязательно'}), 400
+    if not isinstance(history, list):
+        return jsonify({'error': 'Поле "history" должно быть массивом'}), 400
+
+    try:
+        result = chat_service.chat(leader, message, history)
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 400
+    except OllamaUnavailableError as exc:
+        return jsonify({
+            'error': str(exc),
+            'available': False,
+        }), 503
+
+    return jsonify({
+        'reply': result['reply'],
+        'history': result['history'],
+        'model': result['model'],
+        'off_topic': result.get('off_topic', False),
+        'leader': {
+            'id': leader['id'],
+            'name_ru': leader['name_ru'],
+        },
+    })
+
 
 @app.route('/videos/<path:filename>')
 def serve_video(filename):

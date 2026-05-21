@@ -15,7 +15,7 @@ def test_get_leaders(client, sample_leader):
     assert data['count'] >= 1
 
 
-def test_get_leaders_exposes_archive_media_fields(client, db):
+def test_get_leaders_exposes_archive_media_fields(client, seeded_db):
     """Leaders API should expose portrait and video metadata for archive cards"""
     response = client.get('/api/leaders/')
 
@@ -28,7 +28,7 @@ def test_get_leaders_exposes_archive_media_fields(client, db):
     assert 'video_id' in leader
 
 
-def test_get_leaders_preserves_expected_portrait_assignments(client, db):
+def test_get_leaders_preserves_expected_portrait_assignments(client, seeded_db):
     """Specific historical figures should keep their intended portraits."""
     expected_portrait_fragments = {
         'Владимир Ильич Ленин': 'Vladimir_Lenin',
