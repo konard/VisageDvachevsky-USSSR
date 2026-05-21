@@ -6,12 +6,41 @@
     <title>Лица СССР - Интеллектуальная историческая платформа</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/soviet.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Oswald:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=PT+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Prata&family=Rubik:wght@400;500;700&family=Russo+One&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Декоративный красный угловой флаг -->
+    <div class="ussr-flag-corner" aria-hidden="true">
+        <div class="ussr-flag-corner-text">CCCP</div>
+    </div>
+
     <div class="page-wrapper">
+        <!-- Агит-бегущая строка лозунгов эпохи -->
+        <div class="ussr-marquee" aria-hidden="true">
+            <div class="ussr-marquee-track">
+                <span>Слава труду!</span>
+                <span>Мир. Труд. Май.</span>
+                <span>Народ и партия едины</span>
+                <span>Лица СССР — архив эпохи 1917–1991</span>
+                <span>Пятилетку — в четыре года!</span>
+                <span>За мир во всём мире</span>
+                <span>Вперёд, к победе коммунизма!</span>
+                <span>Молодёжь — на стройки века</span>
+                <!-- дубль для бесшовной прокрутки -->
+                <span>Слава труду!</span>
+                <span>Мир. Труд. Май.</span>
+                <span>Народ и партия едины</span>
+                <span>Лица СССР — архив эпохи 1917–1991</span>
+                <span>Пятилетку — в четыре года!</span>
+                <span>За мир во всём мире</span>
+                <span>Вперёд, к победе коммунизма!</span>
+                <span>Молодёжь — на стройки века</span>
+            </div>
+        </div>
+
         <!-- Header -->
         <header class="header">
             <div class="header-rays" aria-hidden="true"></div>
@@ -28,18 +57,46 @@
                 <div class="header-content">
                     <div class="hero-kicker">Цифровой архив эпохи 1917–1991</div>
                     <div class="header-logo">
-                        <div class="header-emblem">
-                            <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="emblem-svg">
-                                <circle cx="30" cy="30" r="28" stroke="#ffd700" stroke-width="2"/>
-                                <!-- Hammer -->
-                                <g transform="translate(14,28) rotate(-30,8,8)">
-                                    <rect x="4" y="6" width="8" height="4" rx="1" fill="#ffd700"/>
-                                    <rect x="7" y="10" width="3" height="10" rx="1" fill="#ffd700"/>
-                                </g>
-                                <!-- Sickle -->
-                                <path d="M30 18 Q42 20 38 34 Q34 42 26 40 Q22 39 24 35 Q26 31 30 30 Q36 28 36 24 Q36 19 30 18Z" fill="none" stroke="#ffd700" stroke-width="2"/>
-                                <!-- Star -->
-                                <polygon points="30,6 31.5,11 36,11 32.5,14 34,19 30,16 26,19 27.5,14 24,11 28.5,11" fill="#ffd700"/>
+                        <div class="header-emblem-wrap">
+                            <svg class="wheat-ear wheat-ear-left" viewBox="0 0 48 84" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M24 82 V 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <ellipse cx="24" cy="12" rx="4" ry="9" fill="currentColor"/>
+                                <ellipse cx="14" cy="24" rx="4" ry="9" fill="currentColor" transform="rotate(-35 14 24)"/>
+                                <ellipse cx="34" cy="24" rx="4" ry="9" fill="currentColor" transform="rotate(35 34 24)"/>
+                                <ellipse cx="12" cy="38" rx="4" ry="9" fill="currentColor" transform="rotate(-40 12 38)"/>
+                                <ellipse cx="36" cy="38" rx="4" ry="9" fill="currentColor" transform="rotate(40 36 38)"/>
+                                <ellipse cx="10" cy="52" rx="4" ry="9" fill="currentColor" transform="rotate(-45 10 52)"/>
+                                <ellipse cx="38" cy="52" rx="4" ry="9" fill="currentColor" transform="rotate(45 38 52)"/>
+                                <ellipse cx="9" cy="66" rx="4" ry="9" fill="currentColor" transform="rotate(-50 9 66)"/>
+                                <ellipse cx="39" cy="66" rx="4" ry="9" fill="currentColor" transform="rotate(50 39 66)"/>
+                            </svg>
+
+                            <div class="header-emblem">
+                                <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="emblem-svg">
+                                    <circle cx="30" cy="30" r="28" stroke="#ffd700" stroke-width="2"/>
+                                    <!-- Hammer -->
+                                    <g transform="translate(14,28) rotate(-30,8,8)">
+                                        <rect x="4" y="6" width="8" height="4" rx="1" fill="#ffd700"/>
+                                        <rect x="7" y="10" width="3" height="10" rx="1" fill="#ffd700"/>
+                                    </g>
+                                    <!-- Sickle -->
+                                    <path d="M30 18 Q42 20 38 34 Q34 42 26 40 Q22 39 24 35 Q26 31 30 30 Q36 28 36 24 Q36 19 30 18Z" fill="none" stroke="#ffd700" stroke-width="2"/>
+                                    <!-- Star -->
+                                    <polygon points="30,6 31.5,11 36,11 32.5,14 34,19 30,16 26,19 27.5,14 24,11 28.5,11" fill="#ffd700"/>
+                                </svg>
+                            </div>
+
+                            <svg class="wheat-ear wheat-ear-right" viewBox="0 0 48 84" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M24 82 V 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <ellipse cx="24" cy="12" rx="4" ry="9" fill="currentColor"/>
+                                <ellipse cx="14" cy="24" rx="4" ry="9" fill="currentColor" transform="rotate(-35 14 24)"/>
+                                <ellipse cx="34" cy="24" rx="4" ry="9" fill="currentColor" transform="rotate(35 34 24)"/>
+                                <ellipse cx="12" cy="38" rx="4" ry="9" fill="currentColor" transform="rotate(-40 12 38)"/>
+                                <ellipse cx="36" cy="38" rx="4" ry="9" fill="currentColor" transform="rotate(40 36 38)"/>
+                                <ellipse cx="10" cy="52" rx="4" ry="9" fill="currentColor" transform="rotate(-45 10 52)"/>
+                                <ellipse cx="38" cy="52" rx="4" ry="9" fill="currentColor" transform="rotate(45 38 52)"/>
+                                <ellipse cx="9" cy="66" rx="4" ry="9" fill="currentColor" transform="rotate(-50 9 66)"/>
+                                <ellipse cx="39" cy="66" rx="4" ry="9" fill="currentColor" transform="rotate(50 39 66)"/>
                             </svg>
                         </div>
                         <h1 class="site-title">
@@ -371,6 +428,12 @@
                         <span class="footer-title">Лица СССР</span>
                     </div>
                     <p class="footer-desc">Интеллектуальная историческая платформа с элементами ИИ-аналитики</p>
+                    <div class="ussr-stamp" aria-hidden="true">
+                        <div class="ussr-stamp-text">
+                            Архив<span class="ussr-stamp-star">★</span>СССР
+                            <div style="font-size:0.6rem; letter-spacing:1px; margin-top:4px;">1917 — 1991</div>
+                        </div>
+                    </div>
                     <p class="footer-copy">&copy; 2024 Лица СССР. Все материалы носят образовательный характер.</p>
                 </div>
             </div>
