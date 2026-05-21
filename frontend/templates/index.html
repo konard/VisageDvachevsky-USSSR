@@ -180,6 +180,47 @@
             </div>
         </div>
 
+        <!-- Chat Modal -->
+        <div id="chatModal" class="modal chat-modal">
+            <div class="modal-content chat-modal-content">
+                <button class="modal-close" id="closeChatModal" title="Закрыть">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="chat-header">
+                    <div class="chat-header-portrait-frame" id="chatLeaderPortraitFrame">
+                        <!-- Portrait inserted dynamically by openChat() -->
+                    </div>
+                    <div class="chat-header-info">
+                        <div class="chat-header-title" id="chatLeaderName">Диалог</div>
+                        <div class="chat-header-sub" id="chatLeaderRole"></div>
+                    </div>
+                    <div class="chat-header-status">
+                        <span class="chat-status checking" id="chatStatus">проверка…</span>
+                        <span class="chat-model" id="chatModelLabel"></span>
+                    </div>
+                </div>
+                <div class="chat-warning" id="chatWarning" style="display:none"></div>
+                <div class="chat-log" id="chatLog" aria-live="polite"></div>
+                <form class="chat-input-row" id="chatForm" autocomplete="off">
+                    <textarea
+                        class="chat-input"
+                        id="chatInput"
+                        rows="2"
+                        placeholder="Задайте вопрос исторической фигуре…"
+                        maxlength="1500"></textarea>
+                    <button type="submit" class="chat-send-btn" id="chatSendBtn">
+                        <span class="chat-send-label">Отправить</span>
+                    </button>
+                </form>
+                <div class="chat-footnote">
+                    Ответ генерируется локальной LLM (Ollama). Не является исторической истиной.
+                </div>
+            </div>
+        </div>
+
         <!-- Video Modal -->
         <div id="videoModal" class="modal video-modal">
             <div class="modal-content video-modal-content">
