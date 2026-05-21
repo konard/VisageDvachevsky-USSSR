@@ -1258,15 +1258,253 @@ body::after {
 
 .events-empty { color: var(--ussr-ink-soft); }
 
-.graph-canvas-wrap {
-    background: var(--ussr-cream);
-    border: 2px solid var(--ussr-ink);
+/* === Граф связей: парадная папка архива === */
+
+.graph-view {
+    position: relative;
+    padding: 28px 26px 30px;
+    border: 4px solid var(--ussr-gold);
+    box-shadow:
+        0 0 0 2px var(--ussr-red-dark) inset,
+        8px 8px 0 var(--ussr-red-dark);
+    background:
+        repeating-linear-gradient(45deg, rgba(122, 12, 24, 0.05) 0 4px, transparent 4px 9px),
+        linear-gradient(180deg, var(--ussr-ivory) 0%, var(--ussr-paper) 100%);
+    overflow: hidden;
 }
 
-.graph-tooltip {
-    background: var(--ussr-ink);
+/* Угловая печать «АРХИВ ★ СВЯЗИ» */
+.graph-view::before {
+    content: 'АРХИВ ★ СВЯЗИ';
+    position: absolute;
+    top: 14px;
+    right: -52px;
+    transform: rotate(35deg);
+    background: var(--ussr-red);
     color: var(--ussr-gold);
+    font-family: 'Russo One', var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    padding: 6px 60px;
+    border-top: 2px solid var(--ussr-gold);
+    border-bottom: 2px solid var(--ussr-gold);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Тонкая «штампованная» лента под заголовком */
+.graph-view::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 0;
+    height: 14px;
+    background:
+        repeating-linear-gradient(90deg, var(--ussr-red) 0 14px, var(--ussr-gold) 14px 28px);
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.graph-header {
+    margin-bottom: 16px;
+    padding-right: 70px; /* чтобы угловая печать не наезжала на текст */
+}
+
+.graph-title {
+    color: var(--ussr-red-dark);
+    font-family: 'Russo One', var(--font-display);
+    font-size: 1.45rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 var(--ussr-gold);
+    margin-bottom: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.graph-title::before,
+.graph-title::after {
+    content: '★';
+    color: var(--ussr-gold);
+    font-size: 1.1rem;
+    text-shadow: none;
+}
+
+.graph-subtitle {
+    color: var(--ussr-ink-soft);
+    font-family: 'PT Serif', Georgia, serif;
+    font-style: italic;
+    margin-bottom: 12px;
+}
+
+/* Легенда: «таблица» с фишками-типами связи */
+.graph-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: stretch;
+    padding: 12px 14px;
+    background:
+        repeating-linear-gradient(90deg, rgba(122, 12, 24, 0.04) 0 6px, transparent 6px 14px),
+        var(--ussr-cream);
+    border: 2px solid var(--ussr-ink);
+    box-shadow:
+        0 0 0 1px var(--ussr-gold) inset,
+        4px 4px 0 var(--ussr-red-dark);
+    position: relative;
+}
+
+.graph-legend::before {
+    content: 'Пояснение';
+    position: absolute;
+    top: -11px;
+    left: 14px;
+    background: var(--ussr-red-dark);
+    color: var(--ussr-gold);
+    font-family: 'Russo One', var(--font-display);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 10px;
     border: 1px solid var(--ussr-gold);
+}
+
+.graph-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    background: var(--ussr-ivory);
+    border: 1px solid var(--ussr-ink-soft);
+    color: var(--ussr-ink);
+    font-family: 'PT Serif', Georgia, serif;
+    font-size: 0.92rem;
+    box-shadow: 2px 2px 0 rgba(122, 12, 24, 0.25);
+}
+
+.graph-legend .legend-swatch {
+    background: transparent;
+    border: none;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.graph-legend .legend-label {
+    text-transform: lowercase;
+    font-variant: small-caps;
+    letter-spacing: 0.5px;
+}
+
+/* Полотно графа: двойная рамка, как у архивной обложки */
+.graph-canvas-wrap {
+    position: relative;
+    margin-top: 16px;
+    padding: 0;
+    background: var(--ussr-paper);
+    border: 3px solid var(--ussr-red-dark);
+    box-shadow:
+        0 0 0 2px var(--ussr-gold) inset,
+        0 0 0 6px var(--ussr-paper) inset,
+        0 0 0 8px var(--ussr-ink) inset,
+        6px 6px 0 var(--ussr-gold-deep);
+}
+
+.graph-canvas-wrap::before,
+.graph-canvas-wrap::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--ussr-gold) 0 40%, var(--ussr-gold-deep) 41% 100%);
+    border: 2px solid var(--ussr-ink);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.graph-canvas-wrap::before { top: 8px;  left: 8px; }
+.graph-canvas-wrap::after  { bottom: 8px; right: 8px; }
+
+#graphCanvas {
+    display: block;
+    width: 100%;
+    height: 600px;
+    cursor: grab;
+    image-rendering: -webkit-optimize-contrast;
+}
+
+/* Тултип: парадная карточка с уголками-скобками */
+.graph-tooltip {
+    position: absolute;
+    min-width: 200px;
+    max-width: 240px;
+    background: var(--ussr-ivory);
+    color: var(--ussr-ink);
+    border: 2px solid var(--ussr-red-dark);
+    padding: 10px 12px 8px;
+    font-family: 'PT Serif', Georgia, serif;
+    font-size: 0.9rem;
+    box-shadow:
+        0 0 0 1px var(--ussr-gold) inset,
+        4px 4px 0 rgba(0, 0, 0, 0.45);
+    z-index: 5;
+    line-height: 1.35;
+}
+
+.graph-tooltip .graph-tooltip-stamp {
+    display: inline-block;
+    color: var(--ussr-red);
+    font-size: 1rem;
+    margin-right: 4px;
+    text-shadow: 0 0 1px var(--ussr-gold);
+}
+
+.graph-tooltip .graph-tooltip-name {
+    display: block;
+    font-family: 'Russo One', var(--font-display);
+    color: var(--ussr-red-dark);
+    font-size: 1rem;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed var(--ussr-gold-deep);
+    padding-bottom: 4px;
+}
+
+.graph-tooltip .graph-tooltip-row {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--ussr-ink);
+}
+
+.graph-tooltip .graph-tooltip-row em {
+    font-style: normal;
+    font-variant: small-caps;
+    color: var(--ussr-ink-soft);
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+}
+
+.graph-tooltip .graph-tooltip-foot {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    color: var(--ussr-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border-top: 1px solid var(--ussr-gold-deep);
+    padding-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .graph-view { padding: 22px 14px 24px; }
+    .graph-view::before { right: -60px; top: 10px; font-size: 0.75rem; }
+    .graph-header { padding-right: 0; }
+    #graphCanvas { height: 460px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Спокойный режим: убираем подвижность фона графа. */
+    .graph-view::after { animation: none; }
 }
 
 /* ===== QUIZ ===== */
