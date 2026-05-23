@@ -1,0 +1,564 @@
+/* ============================================================
+ * MOBILE OVERHAUL — улучшения для телефонов и узких экранов.
+ *
+ * Этот файл подключается ПОСЛЕДНИМ, поэтому его правила
+ * имеют приоритет над style.css / soviet.css. Менять его
+ * можно изолированно, не трогая базовые стили.
+ *
+ * Структура:
+ *   1. Общие правила (border-box, overflow-x, focus-таргеты)
+ *   2. <= 900px — планшетная адаптация
+ *   3. <= 768px — мелкие планшеты и телефоны (landscape)
+ *   4. <= 560px — основной мобильный диапазон
+ *   5. <= 380px — узкие телефоны (iPhone SE / Mini)
+ *   6. iOS safe-area + landscape модалок
+ * ============================================================ */
+
+/* === 1. Общие правила ============================================ */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { overflow-x: hidden; }
+
+/* Предотвращаем нечитаемый зум форм-инпутов на iOS (<16px зум) */
+@media (max-width: 768px) {
+    .search-input,
+    .chat-input,
+    input[type="text"],
+    input[type="search"],
+    textarea { font-size: 16px; }
+}
+
+/* ============================================================
+ * 2. <= 900px — общие сжатия больших декоративных элементов
+ * ============================================================ */
+@media (max-width: 900px) {
+    .ussr-flag-corner { width: 110px; height: 110px; }
+    .ussr-flag-corner-text { font-size: 0.6rem; letter-spacing: 1.5px; top: 18px; left: 8px; }
+    .header-stats { gap: 8px; }
+}
+
+/* ============================================================
+ * 3. <= 768px — планшеты и телефоны landscape
+ * ============================================================ */
+@media (max-width: 768px) {
+    /* --- Контейнер --- */
+    .container { padding: 0 16px; }
+
+    /* --- Хедер: убираем тяжёлые декоративные блоки --- */
+    .header { padding-top: 14px; padding-bottom: 60px; }
+    .header-rays,
+    .header-flag { display: none; }
+    .header-ticker { height: 26px; line-height: 26px; font-size: 0.7rem; }
+
+    /* --- Маркиза лозунгов --- */
+    .ussr-marquee { padding: 6px 0; }
+
+    /* --- Hero panel --- */
+    .hero-kicker { font-size: 0.7rem; letter-spacing: 0.18em; }
+    .hero-panel { gap: 18px; padding: 18px; }
+    .hero-poster { min-height: 160px; }
+    .hero-lead { font-size: 0.98rem; line-height: 1.5; }
+    .header-emblem-wrap { gap: 10px; }
+    .wheat-ear { width: 28px; height: 50px; }
+
+    .title-main { font-size: 1.7rem; letter-spacing: 0.04em; }
+    .title-sub { font-size: 0.78rem; line-height: 1.35; }
+
+    /* --- Statistics: 2 колонки, аккуратные плитки --- */
+    .header-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    .stat-item { padding: 10px 8px; }
+    .stat-value { font-size: 1.1rem; }
+    .stat-label { font-size: 0.66rem; letter-spacing: 0.1em; }
+
+    /* --- Поиск --- */
+    .search-container { gap: 8px; }
+    .search-inner { min-height: 46px; }
+    .search-input { padding: 12px 14px 12px 38px; }
+    .search-btn { min-height: 46px; padding: 10px 16px; font-size: 0.86rem; }
+
+    /* --- Тулбар: горизонтальная прокрутка для скоплений кнопок --- */
+    .toolbar { padding: 10px 0; }
+    .toolbar-content { gap: 10px; }
+
+    .filter-group,
+    .category-group {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        padding-bottom: 4px;
+        width: 100%;
+    }
+    .filter-group::-webkit-scrollbar,
+    .category-group::-webkit-scrollbar { height: 4px; }
+    .filter-group::-webkit-scrollbar-thumb,
+    .category-group::-webkit-scrollbar-thumb {
+        background: var(--c-red-dark);
+        border-radius: 0;
+    }
+
+    .filter-label {
+        font-size: 0.66rem;
+        letter-spacing: 0.1em;
+        position: sticky;
+        left: 0;
+        background: var(--c-paper);
+        padding-right: 6px;
+        z-index: 1;
+    }
+
+    .filter-btn,
+    .category-btn,
+    .view-btn {
+        min-height: 38px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+    }
+
+    .view-toggle { padding: 3px; gap: 4px; }
+    .view-btn { padding: 8px 10px; }
+
+    /* --- Сетка карточек --- */
+    .leaders-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    .main-content { padding: 22px 0 40px; }
+
+    /* --- Карточка лидера --- */
+    .leader-card { box-shadow: 4px 4px 0 var(--c-red-dark), 8px 8px 16px rgba(0,0,0,0.2); }
+    .leader-card-header { padding: 14px 14px 46px; min-height: 118px; }
+    .leader-portrait-frame {
+        width: 92px; height: 116px; bottom: -22px; right: 12px; padding: 4px;
+    }
+    .leader-name { font-size: 1.05rem; max-width: calc(100% - 110px); }
+    .leader-years { font-size: 0.85rem; padding: 2px 8px; }
+    .category-badge { max-width: calc(100% - 110px); }
+    .significance-dots { top: 12px; left: 12px; gap: 3px; }
+    .sig-dot { width: 11px; height: 11px; }
+    .era-badge { top: 8px; right: 8px; font-size: 0.62rem; padding: 3px 12px; }
+
+    .leader-card-body { padding: 32px 16px 12px; }
+    .leader-summary { font-size: 0.96rem; padding: 10px 12px; }
+    .leader-achievements { font-size: 0.95rem; }
+    .leader-card-footer { padding: 12px 14px 14px; gap: 8px; }
+    .leader-card-footer .btn { flex: 1 1 auto; min-height: 44px; padding: 10px 12px; font-size: 0.8rem; }
+
+    .quick-fact { padding: 8px 4px; }
+    .quick-fact-label { font-size: 0.6rem; letter-spacing: 0.08em; }
+    .quick-fact-value { font-size: 0.84rem; }
+
+    /* --- Футер --- */
+    .footer-ribbon { font-size: 0.66rem; }
+    .footer-content { padding-top: 24px; gap: 8px; }
+    .footer-logo { font-size: 1.05rem; }
+    .footer-desc { font-size: 0.92rem; }
+    .ussr-stamp { width: 116px; height: 116px; }
+
+    /* --- Тосты не должны вылезать за экран --- */
+    .toast {
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        transform: translateY(140px);
+        max-width: calc(100% - 32px);
+        white-space: normal;
+        text-align: center;
+        font-size: 0.82rem;
+        padding: 12px 14px;
+        letter-spacing: 0.1em;
+    }
+    .toast.visible { transform: translateY(0); }
+}
+
+/* ============================================================
+ * 4. <= 560px — основной мобильный диапазон
+ *    Здесь делаем модалки fullscreen и переорганизуем
+ *    тяжёлые хедеры (chat / video / quiz).
+ * ============================================================ */
+@media (max-width: 560px) {
+    .container { padding: 0 12px; }
+
+    .hero-panel { padding: 14px; }
+    .hero-poster { min-height: 140px; }
+    .poster-copy strong { font-size: 0.92rem; }
+
+    /* === Общая модалка: full-screen на телефоне === */
+    .modal {
+        background:
+            radial-gradient(ellipse at center, rgba(34,22,16,0.92) 0%, rgba(0,0,0,0.98) 100%);
+    }
+    .modal.active {
+        align-items: stretch;
+        justify-content: stretch;
+        padding: 0;
+    }
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        max-height: 100dvh;
+        height: 100vh;
+        height: 100dvh;
+        margin: 0;
+        border-width: 0;
+        box-shadow: none;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    /* Кнопка закрытия — крупный таргет, без перекрытий */
+    .modal-close {
+        width: 44px;
+        height: 44px;
+        top: 8px;
+        right: 8px;
+        border-width: 2px;
+        box-shadow: 2px 2px 0 var(--c-red-ink);
+    }
+
+    /* === Modal лидера === */
+    .modal-header {
+        padding: 18px 16px 18px;
+        padding-right: 60px; /* место под X */
+    }
+    .modal-header::before { inset: 6px; }
+    .modal-header::after {
+        /* штамп «АРХИВ» — уменьшаем и прячем под крестом */
+        display: none;
+    }
+    .modal-header-top {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 14px;
+        margin-bottom: 10px;
+    }
+    .modal-portrait,
+    .modal-portrait-placeholder {
+        width: 80px;
+        height: 100px;
+    }
+    .modal-title {
+        font-size: 1.25rem;
+        letter-spacing: 0.02em;
+        margin-bottom: 4px;
+        text-shadow: 0 2px 0 var(--c-red-ink);
+    }
+    .modal-subtitle { font-size: 0.92rem; }
+    .modal-era-badge {
+        margin-top: 6px;
+        font-size: 0.66rem;
+        padding: 4px 10px;
+        letter-spacing: 0.12em;
+    }
+    .modal-description {
+        font-size: 0.95rem;
+        margin-top: 10px;
+        padding-top: 10px;
+        line-height: 1.5;
+    }
+    .modal-significance {
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    .modal-significance-label {
+        font-size: 0.64rem;
+        letter-spacing: 0.12em;
+        flex-basis: 100%;
+    }
+    .sig-bar { height: 12px; }
+
+    .modal-body { padding: 20px 16px 28px; }
+    .info-grid { grid-template-columns: 1fr; gap: 10px; }
+    .info-item { padding: 10px 12px; }
+    .info-label { font-size: 0.66rem; }
+    .info-value { font-size: 0.95rem; }
+
+    .section-title { font-size: 0.95rem; letter-spacing: 0.04em; }
+    .facts-list li { padding: 10px 12px 10px 36px; font-size: 0.94rem; line-height: 1.45; }
+    .facts-list li::before { left: 14px; top: 10px; }
+    .biography-text,
+    .legacy-text {
+        padding: 14px 16px;
+        font-size: 0.95rem;
+        line-height: 1.55;
+        box-shadow: 2px 2px 0 var(--c-red-dark);
+    }
+    .video-section { padding: 18px 14px; }
+    .btn-video { font-size: 0.9rem; padding: 12px 18px; gap: 8px; min-height: 46px; }
+
+    /* === Видеомодалка === */
+    .video-modal-content {
+        background: #0a0608;
+        border-width: 0;
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    #videoContainer {
+        padding: 8px 8px 12px;
+        padding-top: 60px; /* под крестом */
+    }
+    .video-title {
+        font-size: 0.84rem;
+        padding: 6px 10px 8px;
+        letter-spacing: 0.1em;
+        line-height: 1.3;
+    }
+    #leaderVideo {
+        max-height: 70vh;
+        max-height: 70dvh;
+        border-width: 1px;
+    }
+
+    /* === Чат-модалка: переорганизация хедера === */
+    .chat-modal-content {
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
+    }
+    .chat-header {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 56px 12px 14px; /* место под X справа */
+        align-items: center;
+    }
+    .chat-header-portrait,
+    .chat-header-portrait-placeholder {
+        width: 44px;
+        height: 56px;
+    }
+    .chat-header-portrait-placeholder { font-size: 1.2rem; }
+    .chat-header-portrait-frame { padding: 2px; }
+    .chat-header-info { flex: 1 1 auto; min-width: 0; }
+    .chat-header-title {
+        font-size: 0.98rem;
+        letter-spacing: 0.02em;
+        text-shadow: 0 1px 0 var(--c-red-ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .chat-header-sub {
+        font-size: 0.78rem;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .chat-header-status {
+        flex-direction: row;
+        flex-wrap: wrap;
+        flex-basis: 100%;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        margin-top: 2px;
+    }
+    .chat-status {
+        font-size: 0.62rem;
+        padding: 3px 8px;
+        letter-spacing: 0.1em;
+        box-shadow: 1px 1px 0 var(--c-red-ink);
+    }
+    .chat-model { font-size: 0.66rem; letter-spacing: 0.04em; }
+
+    .chat-warning {
+        margin: 8px 12px 0;
+        padding: 8px 12px;
+        font-size: 0.86rem;
+        line-height: 1.4;
+    }
+
+    .chat-log { padding: 12px; gap: 10px; }
+    .chat-msg {
+        max-width: 94%;
+        padding: 10px 12px;
+        font-size: 0.94rem;
+        line-height: 1.45;
+        box-shadow: 2px 2px 0 var(--c-red-dark);
+    }
+    .chat-msg-system {
+        font-size: 0.72rem;
+        padding: 5px 10px;
+        letter-spacing: 0.1em;
+    }
+    .chat-msg .chat-msg-role { font-size: 0.66rem; letter-spacing: 0.1em; }
+
+    .chat-input-row {
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px 12px;
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+    .chat-input {
+        font-size: 16px; /* против iOS-zoom */
+        padding: 10px 12px;
+        min-height: 56px;
+        max-height: 120px;
+        box-shadow: inset 0 0 0 1px var(--c-bronze);
+    }
+    .chat-send-btn {
+        width: 100%;
+        padding: 12px 18px;
+        font-size: 0.84rem;
+        letter-spacing: 0.12em;
+        min-height: 46px;
+    }
+    .chat-footnote {
+        font-size: 0.62rem;
+        padding: 8px 12px 10px;
+        letter-spacing: 0.08em;
+    }
+
+    /* === Quiz-модалка === */
+    .quiz-modal-content {
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
+    }
+    .quiz-header {
+        flex-wrap: wrap;
+        padding: 14px 56px 14px 14px;
+        gap: 10px;
+    }
+    .quiz-header-title {
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        flex-basis: 100%;
+    }
+    .quiz-header-scores {
+        flex-basis: 100%;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .quiz-score-pill {
+        padding: 3px 10px;
+        font-size: 0.84rem;
+        gap: 6px;
+    }
+    .quiz-score-label { font-size: 0.58rem; letter-spacing: 0.12em; }
+
+    .quiz-body { padding: 18px 14px; gap: 16px; }
+    .quiz-portrait,
+    .quiz-portrait-placeholder {
+        width: 180px;
+        height: 230px;
+    }
+    .quiz-portrait-frame { width: 180px; }
+    .quiz-portrait-frame::before {
+        width: 40px; height: 40px;
+        font-size: 1.4rem;
+        top: -14px; left: -14px;
+    }
+    .quiz-portrait-hint { gap: 6px; bottom: -14px; }
+    .quiz-hint-pill { font-size: 0.72rem; padding: 3px 10px; }
+    .quiz-options {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-top: 22px;
+    }
+    .quiz-option {
+        padding: 12px 14px;
+        font-size: 0.94rem;
+        min-height: 48px;
+        box-shadow: 2px 2px 0 var(--c-red-dark);
+    }
+    .quiz-feedback { font-size: 0.88rem; }
+    .quiz-actions .btn { width: 100%; min-height: 46px; }
+
+    /* === События / граф / хронология === */
+    .events-view { padding: 18px 14px 22px; box-shadow: 4px 4px 0 var(--c-red-dark); }
+    .events-title { font-size: 1.15rem; }
+    .events-subtitle { font-size: 0.92rem; }
+    .events-year-list { grid-template-columns: 1fr; gap: 10px; }
+    .event-card { padding: 12px 14px; }
+    .event-card-title { font-size: 0.94rem; }
+
+    .graph-view { padding: 16px 12px 18px; }
+    #graphCanvas { height: 360px; max-width: 100%; }
+    .graph-title { font-size: 1.1rem; }
+    .graph-subtitle { font-size: 0.88rem; }
+}
+
+/* ============================================================
+ * 5. <= 380px — узкие телефоны (iPhone SE, mini)
+ * ============================================================ */
+@media (max-width: 380px) {
+    .title-main { font-size: 1.45rem; }
+    .title-sub { font-size: 0.72rem; }
+
+    .header-stats { grid-template-columns: 1fr 1fr; }
+    .stat-value { font-size: 1rem; }
+    .stat-label { font-size: 0.6rem; }
+
+    .modal-portrait,
+    .modal-portrait-placeholder { width: 70px; height: 88px; }
+    .modal-title { font-size: 1.1rem; }
+    .modal-subtitle { font-size: 0.86rem; }
+    .modal-header-top { gap: 10px; }
+    .modal-body { padding: 18px 12px 24px; }
+
+    .chat-header-portrait,
+    .chat-header-portrait-placeholder { width: 40px; height: 50px; }
+    .chat-header-title { font-size: 0.92rem; }
+    .chat-header-sub { font-size: 0.74rem; }
+
+    .quiz-portrait,
+    .quiz-portrait-placeholder { width: 160px; height: 200px; }
+    .quiz-portrait-frame { width: 160px; }
+
+    .leader-name { font-size: 0.98rem; max-width: calc(100% - 100px); }
+    .category-badge { font-size: 0.64rem; padding: 3px 8px; max-width: calc(100% - 100px); }
+    .leader-portrait-frame { width: 84px; height: 104px; }
+
+    .filter-btn,
+    .category-btn,
+    .view-btn { font-size: 0.74rem; padding: 8px 10px; }
+}
+
+/* ============================================================
+ * 6. iOS safe-area + landscape модалок
+ * ============================================================ */
+@media (max-width: 768px) {
+    /* безопасные отступы под выемку и нижнюю плашку */
+    .modal-content { padding-bottom: env(safe-area-inset-bottom); }
+    .chat-input-row { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+    .modal-close {
+        top: max(8px, env(safe-area-inset-top));
+        right: max(8px, env(safe-area-inset-right));
+    }
+    .ussr-flag-corner { top: env(safe-area-inset-top); left: env(safe-area-inset-left); }
+}
+
+/* В альбомной ориентации на маленьких экранах модалка короче — */
+/* убираем full-height у quiz и chat, чтобы видеть всё без скролла */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+    .modal.active { padding: 0; }
+    .modal-content,
+    .chat-modal-content,
+    .quiz-modal-content {
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100vh;
+        max-height: 100dvh;
+    }
+    .chat-log { padding: 8px 12px; }
+    .chat-input-row { padding: 8px 12px; }
+    .chat-input { min-height: 44px; }
+    .modal-header { padding: 10px 60px 10px 14px; }
+    .modal-portrait, .modal-portrait-placeholder { width: 64px; height: 80px; }
+    .modal-title { font-size: 1.05rem; }
+    .quiz-portrait, .quiz-portrait-placeholder { width: 140px; height: 178px; }
+    .quiz-portrait-frame { width: 140px; }
+    .quiz-body { padding: 14px 14px; gap: 10px; }
+}
