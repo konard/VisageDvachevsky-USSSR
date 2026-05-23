@@ -59,7 +59,10 @@ def test_system_prompt_contains_leader_facts_and_rules():
     assert "1870" in prompt and "1924" in prompt
     assert "Председатель Совета народных комиссаров" in prompt
     assert "Октябрьская революция" in prompt
-    assert "Жёсткие правила поведения" in prompt
+    assert "Правила поведения" in prompt
+    # The new prompt explicitly invites ideological discussion so questions
+    # like "почему ты выбрал марксизм?" don't get refused.
+    assert "марксизм" in prompt.lower()
     # Refusal phrasing must be in system prompt so the LLM mirrors it
     assert OFF_TOPIC_REPLY in prompt
 
@@ -96,6 +99,38 @@ def test_chat_short_circuits_obvious_off_topic_messages():
     session.post.assert_not_called()
     assert result["off_topic"] is True
     assert result["reply"] == OFF_TOPIC_REPLY
+
+
+def test_chat_lets_marxism_question_reach_the_llm():
+    """Regression test for issue #24.
+
+    Asking Lenin "why did you choose Marxism?" previously got refused before
+    the LLM was ever called.  The new intent classifier must let it through.
+    """
+    session, _ = _make_session({"message": {"content": "Я выбрал марксизм потому что..."}})
+    service = ChatService(base_url="http://test", model="m", session=session)
+
+    result = service.chat(LEADER, "Почему вы выбрали марксизм?")
+
+    session.post.assert_called_once()
+    assert result["off_topic"] is False
+    assert result["intent"] in {"on_topic", "uncertain"}
+    # Context block should be present since RAG kicks in for biography questions.
+    assert isinstance(result.get("context"), list)
+
+
+def test_chat_attaches_rag_context_to_system_prompt():
+    """RAG retriever should add a context block to the LLM input."""
+    session, _ = _make_session({"message": {"content": "ok"}})
+    service = ChatService(base_url="http://test", model="m", session=session)
+
+    service.chat(LEADER, "Расскажите про Октябрьскую революцию")
+
+    body = session.post.call_args.kwargs["json"]
+    system_prompt = body["messages"][0]["content"]
+    # The biography mentions Октябрьская революция, so the retrieved snippet
+    # should appear under a context block heading.
+    assert "Дополнительные сведения из базы знаний" in system_prompt
 
 
 def test_chat_short_circuits_jailbreak_attempts():

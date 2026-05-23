@@ -7,7 +7,7 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 from flask_cors import CORS
 from database import Database
 from ai_service import AIService
-from chat_service import ChatService, OllamaUnavailableError
+from chat_service import ChatService, OllamaUnavailableError, build_default_chat_service
 from timeline_data import get_timeline
 from connections_data import get_connections
 
@@ -19,7 +19,7 @@ CORS(app)
 # Initialize database and services
 db = Database()
 ai_service = AIService()
-chat_service = ChatService()
+chat_service = build_default_chat_service(leader_loader=db.get_all_leaders)
 
 @app.route('/')
 def index():
